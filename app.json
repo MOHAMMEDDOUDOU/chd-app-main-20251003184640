@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "taziri",
+    "slug": "taziri",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo-removebg-preview_p22obg.png",
+    "scheme": "taziri",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo-removebg-preview_p22obg.png",
+        "backgroundColor": "#FF6B35"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo-removebg-preview_p22obg.png",
+      "build": {
+        "babel": {
+          "include": [
+            "react-native-worklets"
+          ]
+        }
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      "expo-image-picker",
+      "expo-file-system",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/logo-removebg-preview_p22obg.png",
+          "color": "#FF6B35",
+          "sounds": [
+            "./assets/sounds/notification.wav"
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4af22111-5cb7-493f-a479-5034c833167f"
+      }
+    },
+    "owner": "mohammed-doudou9"
+  }
+}

@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"name": "chd app",
+			"path": "."
+		},
+		{
+			"name": "chdweb",
+			"path": "../chdweb"
+		}
+	]
+}

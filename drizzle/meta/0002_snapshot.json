@@ -1,0 +1,156 @@
+{
+  "id": "0002_add_tracking_number",
+  "prevId": "0001_add_chat_tables",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "orders": {
+      "name": "orders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "hasDefault": true,
+          "default": "gen_random_uuid()"
+        },
+        "item_type": {
+          "name": "item_type",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "item_name": {
+          "name": "item_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "unit_price": {
+          "name": "unit_price",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "shipping_cost": {
+          "name": "shipping_cost",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "total_amount": {
+          "name": "total_amount",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "customer_name": {
+          "name": "customer_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "wilaya": {
+          "name": "wilaya",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "commune": {
+          "name": "commune",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "delivery_type": {
+          "name": "delivery_type",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "reseller_price": {
+          "name": "reseller_price",
+          "type": "decimal(10,2)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "order_link": {
+          "name": "order_link",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "seller_id": {
+          "name": "seller_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "seller_name": {
+          "name": "seller_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "reseller_phone": {
+          "name": "reseller_phone",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "tracking_number": {
+          "name": "tracking_number",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "hasDefault": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {}
+    }
+  }
+}

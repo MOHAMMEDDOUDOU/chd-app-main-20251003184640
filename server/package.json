@@ -1,0 +1,15 @@
+{
+  "name": "zr-express-server",
+  "version": "1.0.0",
+  "description": "Express server to handle CORS issues with ZR Express API",
+  "main": "zr-express-server.js",
+  "scripts": {
+    "start": "node zr-express-server.js"
+  },
+  "dependencies": {
+    "@types/react": "^19.1.12",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2"
+  }
+}

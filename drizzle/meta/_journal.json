@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1755714548347,
+      "tag": "0000_loving_scarlet_spider",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755714548347,
+      "tag": "0001_add_chat_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755714548347,
+      "tag": "0002_add_tracking_number",
+      "breakpoints": true
+    }
+  ]
+}

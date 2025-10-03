@@ -1,5 +1,5 @@
 import { db } from './database/config';
-import { users } from './database/config';
+import { users, orders, sessions, notifications, conversations, messages, resellLinks } from './database/config';
 import { eq } from 'drizzle-orm';
 
 export interface UpdateUserData {
@@ -141,5 +141,48 @@ export async function updateUserPushToken(userId: string, pushToken: string) {
       success: false,
       error: 'فشل في تحديث رمز الإشعارات'
     };
+  }
+}
+
+// حذف حساب المستخدم نهائياً (مع الاعتماد على onDelete: 'cascade' في العلاقات)
+export async function deleteUserAccount(userId: string) {
+  try {
+    // فك أي مراجع قد تمنع الحذف (أعمدة ليست عليها onDelete:cascade)
+    await db.update(orders).set({ sellerId: null }).where(eq(orders.sellerId, userId));
+    await db.update(orders).set({ resellerUserId: null }).where(eq(orders.resellerUserId, userId));
+
+    // حذف الجلسات والتنبيهات والروابط - معظمها مفعّل عليها cascade لكن لا ضرر من محاولة التنظيف المسبق
+    await db.delete(sessions).where(eq(sessions.userId, userId));
+    await db.delete(notifications).where(eq(notifications.userId, userId));
+    await db.delete(resellLinks).where(eq(resellLinks.userId, userId));
+    await db.delete(messages).where(eq(messages.senderId, userId));
+    await db.delete(messages).where(eq(messages.receiverId, userId));
+    await db.delete(conversations).where(eq(conversations.userId, userId));
+
+    const deleted = await db.delete(users).where(eq(users.id, userId)).returning();
+    if (!deleted || deleted.length === 0) {
+      return { success: false, error: 'المستخدم غير موجود' };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting user account:', error);
+    // Fallback: إخفاء/إبطال الحساب ومسح البيانات الشخصية (امتثال 5.1.1(v))
+    try {
+      await db.update(users)
+        .set({
+          isActive: false,
+          fullName: 'Deleted User',
+          username: `deleted_${userId.substring(0, 6)}`,
+          phoneNumber: 'deleted',
+          profileImageUrl: null,
+          pushToken: null,
+        })
+        .where(eq(users.id, userId));
+      await db.delete(sessions).where(eq(sessions.userId, userId));
+      return { success: true };
+    } catch (scrubError) {
+      console.error('Error scrubbing user data:', scrubError);
+      return { success: false, error: 'فشل في حذف/تعطيل الحساب' };
+    }
   }
 }

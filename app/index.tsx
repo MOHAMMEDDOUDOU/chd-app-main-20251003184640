@@ -8,9 +8,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useUser } from '../lib/userContext';
 
 export default function IndexScreen() {
   const router = useRouter();
+  const { user, isLoading } = useUser();
   const fadeAnim = new Animated.Value(0);
   const logoScaleAnim = new Animated.Value(0.3);
   const textFadeAnim = new Animated.Value(0);
@@ -41,11 +43,24 @@ export default function IndexScreen() {
     ]).start();
 
     const timer = setTimeout(() => {
-      router.replace('/welcome');
+      // التحقق من حالة تسجيل الدخول
+      if (!isLoading) {
+        if (user) {
+          // المستخدم مسجل، توجه للصفحة الرئيسية
+          if (user.role === 'admin') {
+            router.replace('/admin');
+          } else {
+            router.replace('/(tabs)');
+          }
+        } else {
+          // المستخدم غير مسجل، توجه لصفحة الترحيب
+          router.replace('/welcome');
+        }
+      }
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [user, isLoading]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -63,7 +78,7 @@ export default function IndexScreen() {
           <View style={styles.logoBackground}>
             <Image
               source={{
-                uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1756463555/logo-removebg-preview_p22obg.png'
+                uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1757597539/VERMAX-removebg-preview_ss3uld.png'
               }}
               style={styles.logoImage}
               resizeMode="contain"
@@ -80,7 +95,7 @@ export default function IndexScreen() {
             }
           ]}
         >
-          <Text style={styles.appName}>taziri</Text>
+          <Text style={styles.appName}>VERMAX</Text>
           <Text style={styles.appSlogan}>منصة إعادة البيع الأولى</Text>
         </Animated.View>
       </View>

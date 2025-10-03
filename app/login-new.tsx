@@ -41,7 +41,7 @@ export default function LoginNewScreen() {
       if (result.success) {
         Alert.alert(
           'نجح تسجيل الدخول',
-          'مرحباً بك في taziri!',
+          'مرحباً بك في vermax!',
           [
             {
               text: 'حسناً',
@@ -80,7 +80,7 @@ export default function LoginNewScreen() {
 
           {/* Form */}
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>مرحباً بك في taziri</Text>
+            <Text style={styles.formTitle}>مرحباً بك في vermax</Text>
             <Text style={styles.formSubtitle}>
               سجل دخولك لبدء رحلتك في عالم إعادة البيع
             </Text>
@@ -155,6 +155,17 @@ export default function LoginNewScreen() {
                 <Text style={styles.registerLink}>إنشاء حساب جديد</Text>
               </TouchableOpacity>
             </View>
+
+          {/* Continue as Guest (placed after register link) */}
+          <TouchableOpacity
+            style={styles.guestButton}
+            onPress={() => {
+              Alert.alert('الدخول كضيف', 'يمكنك التصفح كضيف. الميزات الحسابية تتطلب تسجيل الدخول.');
+              router.replace('/(tabs)');
+            }}
+          >
+            <Text style={styles.guestButtonText}>المتابعة كضيف</Text>
+          </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -290,6 +301,20 @@ const styles = StyleSheet.create({
   registerLink: {
     fontSize: 14,
     color: '#FF6B35',
+    fontWeight: '600',
+  },
+  guestButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  guestButtonText: {
+    fontSize: 14,
+    color: '#1F2937',
     fontWeight: '600',
   },
 });

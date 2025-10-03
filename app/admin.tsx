@@ -5,9 +5,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Modal,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Package, Tag, ShoppingBag, LogOut, FolderOpen } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,8 +18,10 @@ import OffersManagement from '../components/OffersManagement';
 import OrdersManagement from '../components/OrdersManagement';
 import CategoriesManagement from '../components/CategoriesManagement';
 import ChatsManagement from '../components/ChatsManagement';
+import SellersManagement from '../components/SellersManagement';
 
 export default function AdminScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user, logout } = useUser();
   const { isAdmin, currentSection, setCurrentSection } = useAdmin();
@@ -69,13 +71,15 @@ export default function AdminScreen() {
         return <CategoriesManagement onClose={() => setCurrentSection('products')} />;
       case 'chats':
         return <ChatsManagement onClose={() => setCurrentSection('products')} />;
+      case 'sellers':
+        return <SellersManagement onClose={() => setCurrentSection('products')} />;
       default:
         return <ProductsManagement />;
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }] }>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft} />
@@ -129,6 +133,16 @@ export default function AdminScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
+            style={[styles.tab, currentSection === 'sellers' && styles.activeTab]}
+            onPress={() => setCurrentSection('sellers')}
+          >
+            <Ionicons name="people" size={20} color={currentSection === 'sellers' ? '#FF6B35' : '#666'} />
+            <Text style={[styles.tabText, currentSection === 'sellers' && styles.activeTabText]}>
+              البائعون
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={[styles.tab, currentSection === 'chats' && styles.activeTab]}
             onPress={() => setCurrentSection('chats')}
           >
@@ -165,6 +179,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+    zIndex: 10,
+    elevation: 4,
   },
   headerLeft: {
     width: 40,

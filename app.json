@@ -1,36 +1,49 @@
 {
   "expo": {
-    "name": "taziri",
-    "slug": "taziri",
-    "version": "1.0.0",
+    "name": "VERMAX",
+    "slug": "vermax2025",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo-removebg-preview_p22obg.png",
-    "scheme": "taziri",
-    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/logo-removebg-preview_p22obg.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FF6B35"
+    },
+    "scheme": "vermaxnext",
+    "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.mohadoudou.vermaxnext",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "We need microphone access to record voice messages.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo-removebg-preview_p22obg.png",
-        "backgroundColor": "#FF6B35"
+        "backgroundColor": "#FF6B35",
+        "monochromeImage": "./assets/images/logo-removebg-preview_p22obg.png"
       },
+      "softwareKeyboardLayoutMode": "pan",
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.INTERNET"
-      ]
+      ],
+      "package": "com.mohadoudou.vermaxnext",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/logo-removebg-preview_p22obg.png",
+      "favicon": "https://res.cloudinary.com/deh3ejeph/image/upload/v1757597539/VERMAX-removebg-preview_ss3uld.png",
       "build": {
         "babel": {
-          "include": [
-            "react-native-worklets"
-          ]
+          "include": []
         }
       }
     },
@@ -38,7 +51,6 @@
       "expo-router",
       "expo-font",
       "expo-web-browser",
-      "expo-image-picker",
       "expo-file-system",
       [
         "expo-notifications",
@@ -57,9 +69,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "4af22111-5cb7-493f-a479-5034c833167f"
+        "projectId": "0fc4adfe-d3cd-42c3-9984-7283b95e994b"
       }
     },
-    "owner": "mohammed-doudou9"
+    "owner": "youcef-doudou"
   }
 }

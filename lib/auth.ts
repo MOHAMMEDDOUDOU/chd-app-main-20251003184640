@@ -85,7 +85,7 @@ export class AuthService {
 
       // طلب إذن الإشعارات وتسجيل الجهاز
       try {
-        await NotificationService.registerForPushNotifications(user.id);
+        await NotificationService.registerForPushNotifications(newUser.id);
       } catch (error) {
         console.log('Push notification registration failed:', error);
       }
@@ -188,7 +188,7 @@ export class AuthService {
 
       // طلب إذن الإشعارات وتسجيل الجهاز
       try {
-        await NotificationService.registerForPushNotifications(newUser.id);
+        await NotificationService.registerForPushNotifications(user.id);
       } catch (error) {
         console.log('Push notification registration failed:', error);
       }

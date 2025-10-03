@@ -30,6 +30,7 @@ export interface CreateProductData {
   sizes?: any;
   images?: any;
   category: string;
+  seller_id?: string;
 }
 
 export interface UpdateProductData {
@@ -43,6 +44,7 @@ export interface UpdateProductData {
   sizes?: any;
   images?: any;
   category?: string;
+  seller_id?: string;
   is_active?: boolean;
 }
 
@@ -107,6 +109,7 @@ export async function createProduct(data: CreateProductData) {
       sizes: data.sizes,
       images: data.images,
       category: data.category,
+      sellerId: data.seller_id || null,
       isActive: true,
     }).returning();
     
@@ -150,6 +153,7 @@ export async function updateProduct(id: string, data: UpdateProductData) {
         sizes: data.sizes,
         images: data.images,
         category: data.category,
+        sellerId: data.seller_id,
         isActive: data.is_active,
         updatedAt: new Date(),
       })

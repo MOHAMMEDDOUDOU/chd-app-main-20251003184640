@@ -85,12 +85,14 @@ export const products = pgTable('products', {
   images: jsonb('images'),
   categoryId: uuid('category_id').references(() => categories.id),
   category: varchar('category', { length: 100 }),
+  sellerId: uuid('seller_id').references(() => sellers.id),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   categoryIdx: index('idx_products_category').on(table.category),
   categoryIdIdx: index('idx_products_category_id').on(table.categoryId),
+  productSellerIdx: index('idx_products_seller_id').on(table.sellerId),
   priceIdx: index('idx_products_price').on(table.price),
   createdAtIdx: index('idx_products_created_at').on(table.createdAt),
   activeIdx: index('idx_products_is_active').on(table.isActive),
@@ -108,10 +110,12 @@ export const offers = pgTable('offers', {
   sizes: jsonb('sizes'),
   images: jsonb('images'),
   category: varchar('category', { length: 100 }),
+  sellerId: uuid('seller_id').references(() => sellers.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   categoryIdx: index('idx_offers_category').on(table.category),
+  offerSellerIdx: index('idx_offers_seller_id').on(table.sellerId),
   priceIdx: index('idx_offers_price').on(table.price),
   createdAtIdx: index('idx_offers_created_at').on(table.createdAt),
 }));
@@ -138,6 +142,7 @@ export const orders = pgTable('orders', {
   sellerId: uuid('seller_id').references(() => users.id),
   sellerName: varchar('seller_name', { length: 255 }),
   resellerPhone: varchar('reseller_phone', { length: 30 }),
+  resellerUserId: uuid('reseller_user_id').references(() => users.id),
   trackingNumber: varchar('tracking_number', { length: 50 }),
   imageUrl: text('image_url'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -147,6 +152,7 @@ export const orders = pgTable('orders', {
   statusIdx: index('idx_orders_status').on(table.status),
   orderLinkIdx: index('idx_orders_order_link').on(table.orderLink),
   sellerIdx: index('idx_orders_seller').on(table.sellerId),
+  resellerUserIdx: index('idx_orders_reseller_user').on(table.resellerUserId),
 }));
 
 // Login attempts table
@@ -208,6 +214,20 @@ export const resellLinks = pgTable('resell_links', {
   activeIdx: index('idx_resell_active').on(table.isActive),
 }));
 
+// Sellers table
+export const sellers = pgTable('sellers', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  phoneNumber: varchar('phone_number', { length: 30 }),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  nameIdx: index('idx_sellers_name').on(table.name),
+  phoneIdx: index('idx_sellers_phone').on(table.phoneNumber),
+  activeIdx: index('idx_sellers_active').on(table.isActive),
+}));
+
 // Conversations table
 export const conversations = pgTable('conversations', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -266,6 +286,8 @@ export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 export type ResellLink = typeof resellLinks.$inferSelect;
 export type NewResellLink = typeof resellLinks.$inferInsert;
+export type Seller = typeof sellers.$inferSelect;
+export type NewSeller = typeof sellers.$inferInsert;
 
 
 // Database connection
@@ -284,7 +306,8 @@ export const db = drizzle(sql, {
     notifications,
     conversations,
     messages,
-    resellLinks
+    resellLinks,
+    sellers
   }
 });
 

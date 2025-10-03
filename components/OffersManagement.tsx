@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,8 @@ export default function OffersManagement() {
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
   const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const pageSize = 6;
 
   // تحميل العروض
   const loadOffers = async () => {
@@ -58,7 +60,14 @@ export default function OffersManagement() {
       );
       setFilteredOffers(filtered);
     }
+    setPage(0);
   }, [searchQuery, offers]);
+
+  const totalPages = useMemo(() => Math.ceil(filteredOffers.length / pageSize) || 1, [filteredOffers.length]);
+  const pagedOffers = useMemo(() => {
+    const start = page * pageSize;
+    return filteredOffers.slice(start, start + pageSize);
+  }, [filteredOffers, page]);
 
   // تحميل العروض عند فتح الصفحة
   useEffect(() => {
@@ -125,8 +134,8 @@ export default function OffersManagement() {
     setEditingOffer(null);
   };
 
-  const formatPrice = (price: string) => {
-    return `${Number(price).toLocaleString()} دج`;
+  const formatPrice = (price: number) => {
+    return `${price.toLocaleString()} دج`;
   };
 
   const OfferAdminCard = ({ offer }: { offer: Offer }) => {
@@ -181,11 +190,11 @@ export default function OffersManagement() {
           </Text>
           <View style={styles.priceContainer}>
             <Text style={styles.offerPrice}>
-              {formatPrice(offer.price)}
+              {formatPrice(Number((offer as any).price))}
             </Text>
             {(offer as any).discount_price && (
               <Text style={styles.discountPrice}>
-                {formatPrice((offer as any).discount_price)}
+                {formatPrice(Number((offer as any).discount_price))}
               </Text>
             )}
           </View>
@@ -257,12 +266,33 @@ export default function OffersManagement() {
           </View>
         ) : (
           <View style={styles.offersGrid}>
-            {filteredOffers.map((offer) => (
+            {pagedOffers.map((offer) => (
               <OfferAdminCard key={offer.id} offer={offer} />
             ))}
           </View>
         )}
       </ScrollView>
+
+      {/* Pagination Controls */}
+      {filteredOffers.length > pageSize && (
+        <View style={styles.pagination}>
+          <TouchableOpacity
+            style={[styles.navButton, page === 0 && styles.navButtonDisabled]}
+            onPress={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
+          >
+            <Text style={styles.navButtonText}>السابق</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageIndicator}>{page + 1} / {totalPages}</Text>
+          <TouchableOpacity
+            style={[styles.navButton, page >= totalPages - 1 && styles.navButtonDisabled]}
+            onPress={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+          >
+            <Text style={styles.navButtonText}>التالي</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Offer Form Modal */}
       <OfferForm
@@ -369,7 +399,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -378,6 +408,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  navButton: {
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  navButtonDisabled: {
+    backgroundColor: '#F3F4F6',
+  },
+  navButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  pageIndicator: {
+    marginHorizontal: 8,
+    color: '#6B7280',
   },
   offerImageContainer: {
     width: '100%',

@@ -585,10 +585,11 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                           <Text style={[styles.detailValue, { textAlign: 'right' }]}>{selectedOrderForDetails.quantity || 0}</Text>
                         </View>
                       </View>
+
                     </View>
                   </View>
 
-                  {/* Seller Section */}
+                  {/* Seller Section - البائع الذي باع السلعة */}
                   <View style={styles.sectionCard}>
                     <View style={styles.sectionHeader}>
                       <Text style={styles.sectionTitle}>معلومات البائع</Text>
@@ -598,7 +599,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                         <View style={styles.detailTextContainer}>
                           <Text style={styles.detailLabel}>اسم البائع</Text>
                           <Text style={styles.detailValue}>
-                            {selectedOrderForDetails.sellerName || 'غير محدد'}
+                            {selectedOrderForDetails.resellerName || 'غير محدد'}
                           </Text>
                         </View>
                       </View>
@@ -659,6 +660,44 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                       </View>
                     </View>
                   </View>
+
+                  {/* البائع الذي اشتريت منه السلعة */}
+                  {selectedOrderForDetails.sellerName && (
+                    <View style={styles.sectionCard}>
+                      <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>البائع الذي اشتريت منه السلعة</Text>
+                      </View>
+                      <View style={styles.sectionContent}>
+                        <View style={styles.detailRow}>
+                          <View style={styles.detailTextContainer}>
+                            <Text style={styles.detailLabel}>اسم البائع</Text>
+                            <Text style={styles.detailValue}>
+                              {selectedOrderForDetails.sellerName}
+                            </Text>
+                          </View>
+                        </View>
+                        
+                        {selectedOrderForDetails.sellerPhone && (
+                          <View style={styles.detailRow}>
+                            <View style={styles.detailTextContainer}>
+                              <Text style={styles.detailLabel}>رقم هاتف البائع</Text>
+                              <View style={styles.phoneNumberContainer}>
+                                <Text style={styles.phoneNumberText}>
+                                  +213 {selectedOrderForDetails.sellerPhone}
+                                </Text>
+                                <TouchableOpacity 
+                                  style={styles.whatsappButton}
+                                  onPress={() => openWhatsApp(selectedOrderForDetails.sellerPhone, `طلبية في ${selectedOrderForDetails.itemName}`)}
+                                >
+                                  <MessageCircle size={20} color="#FFFFFF" />
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  )}
 
                   {/* Delivery Section */}
                   <View style={styles.sectionCard}>

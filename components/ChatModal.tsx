@@ -13,15 +13,17 @@ import {
   Dimensions,
   Alert
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../lib/userContext';
-import { getOrCreateConversation, listMessages, sendMessage } from '../lib/conversations';
+import { getOrCreateConversation, listMessages, sendMessage, getDefaultAdmin, markAsRead } from '../lib/conversations';
 
 interface Props { onClose: () => void; }
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function ChatModal({ onClose }: Props) {
+  const insets = useSafeAreaInsets();
   const { user } = useUser();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -29,16 +31,23 @@ export default function ChatModal({ onClose }: Props) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const [adminId, setAdminId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       if (!user?.id) return;
       setLoading(true);
       try {
-        // temporary: assume a single admin user exists with role 'admin'
-        const adminId = user.id; // replace with real admin id lookup if needed
-        const conv = await getOrCreateConversation({ userId: user.id, adminId });
+        // fetch real default admin
+        const admin = await getDefaultAdmin();
+        const adminUserId = admin?.id || user.id; // fallback to self if not found
+        setAdminId(adminUserId);
+        const conv = await getOrCreateConversation({ userId: user.id, adminId: adminUserId });
         setConversationId(conv.id);
+        
+        // Mark messages as read when opening chat
+        await markAsRead(conv.id, user.id);
+        
         const msgs = await listMessages(conv.id, 100, 0);
         setMessages(msgs);
       } finally {
@@ -79,7 +88,7 @@ export default function ChatModal({ onClose }: Props) {
       const msg = await sendMessage({
         conversationId,
         senderId: user.id,
-        receiverId: user.id, // replace with real admin id
+        receiverId: adminId || user.id,
         messageType: 'text',
         messageContent: messageText,
       });
@@ -161,7 +170,11 @@ export default function ChatModal({ onClose }: Props) {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView
+      style={[styles.container, { paddingBottom: Platform.OS === 'android' ? insets.bottom : 0 }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    >
       <View style={styles.header}>
         <View style={styles.headerInfo}>
           <View style={styles.headerAvatar}>
@@ -193,7 +206,7 @@ export default function ChatModal({ onClose }: Props) {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { paddingBottom: Math.max(16, insets.bottom) }]}>
         <TextInput
           style={styles.textInput}
           value={newMessage}

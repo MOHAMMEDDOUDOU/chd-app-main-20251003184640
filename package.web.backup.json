@@ -1,5 +1,5 @@
 {
-  "name": "taziri-web-server",
+  "name": "vermax-web-server",
   "version": "1.0.0",
   "description": "خادم ويب لصفحات الطلبيات",
   "main": "server.js",
@@ -15,11 +15,11 @@
     "nodemon": "^3.0.1"
   },
   "keywords": [
-    "taziri",
+    "vermax",
     "orders",
     "web",
     "server"
   ],
-  "author": "Taziri Team",
+  "author": "Vermax Team",
   "license": "MIT"
 }

@@ -8,17 +8,17 @@ import {
   Alert,
   TextInput,
   Modal,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, User, Phone, LogOut, Camera, Edit3, Save, X } from 'lucide-react-native';
+import { ArrowLeft, User, Phone, LogOut, Camera, Edit3, Save, X, Trash2 } from 'lucide-react-native';
 import { useUser } from '../lib/userContext';
 import UserAvatar from '../components/UserAvatar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
 import { AuthService } from '../lib/auth';
 import { CloudinaryService } from '../lib/cloudinary';
-import { updateUserProfile } from '../lib/users';
+import { updateUserProfile, deleteUserAccount } from '../lib/users';
 import { UserSettingsService } from '../lib/notifications';
 
 export default function ProfileScreen() {
@@ -141,38 +141,6 @@ export default function ProfileScreen() {
     }
   }, [isLoading, user]);
 
-  const pickImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const imageUri = result.assets[0].uri;
-        
-        // إظهار رسالة التحميل
-        Alert.alert('جاري التحميل', 'يرجى الانتظار...', [], { cancelable: false });
-        
-        // رفع الصورة إلى Cloudinary
-        const cloudinaryUrl = await CloudinaryService.uploadImage(imageUri);
-        
-        // إغلاق رسالة التحميل
-        Alert.alert('تم التحميل', 'تم رفع الصورة بنجاح');
-        
-        if (cloudinaryUrl) {
-          setEditData(prev => ({ ...prev, profileImageUrl: cloudinaryUrl }));
-        } else {
-          Alert.alert('خطأ', 'فشل في رفع الصورة');
-        }
-      }
-    } catch (error) {
-      console.log('Error picking image:', error);
-      Alert.alert('خطأ', 'فشل في اختيار الصورة');
-    }
-  };
 
 
 
@@ -239,6 +207,36 @@ export default function ProfileScreen() {
               router.replace('/login');
             } catch (error) {
               console.log('Error during logout:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'حذف الحساب',
+      'هل أنت متأكد من حذف حسابك نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.',
+      [
+        { text: 'إلغاء', style: 'cancel' },
+        {
+          text: 'حذف',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              if (!user?.id) return;
+              const result = await deleteUserAccount(user.id);
+              if (result.success) {
+                await logout();
+                await AsyncStorage.removeItem('user');
+                Alert.alert('تم', 'تم حذف الحساب نهائياً');
+                router.replace('/');
+              } else {
+                Alert.alert('خطأ', result.error || 'تعذر حذف الحساب');
+              }
+            } catch (error) {
+              Alert.alert('خطأ', 'حدث خطأ أثناء حذف الحساب');
             }
           },
         },
@@ -351,19 +349,26 @@ export default function ProfileScreen() {
               <Text style={styles.notificationDescription}>استلام إشعارات للأخبار والطلبات والعروض الجديدة</Text>
             </View>
             <TouchableOpacity
-              style={[styles.toggleButton, notificationsEnabled && styles.toggleButtonActive]}
               onPress={() => updateNotificationSettings(!notificationsEnabled)}
               disabled={isLoadingSettings}
+              activeOpacity={0.8}
             >
-              <View style={[styles.toggleCircle, notificationsEnabled && styles.toggleCircleActive]} />
+              <View style={[styles.toggleButton, notificationsEnabled && styles.toggleButtonActive]}>
+                <View style={[styles.toggleCircle, notificationsEnabled && styles.toggleCircleActive]} />
+              </View>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Logout Button */}
+        {/* Logout & Delete Buttons */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut size={20} color="#EF4444" />
           <Text style={styles.logoutText}>تسجيل الخروج</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
+          <Trash2 size={20} color="#FFFFFF" />
+          <Text style={styles.deleteText}>حذف الحساب نهائياً</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -391,7 +396,7 @@ export default function ProfileScreen() {
                   size={100}
                   fontSize={40}
                 />
-                                 <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+                                 <TouchableOpacity style={styles.imageButton} onPress={() => Alert.alert('معلومة', 'ميزة رفع الصور غير متاحة حالياً')}>
                    <Camera size={16} color="#FF6B35" />
                    <Text style={styles.imageButtonText}>اختيار صورة</Text>
                  </TouchableOpacity>
@@ -573,28 +578,33 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     width: 50,
-    height: 28,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 14,
-    padding: 2,
+    height: 30,
+    backgroundColor: 'rgb(82, 82, 82)',
+    borderRadius: 20,
     justifyContent: 'center',
+    position: 'relative',
   },
   toggleButtonActive: {
     backgroundColor: '#FF6B35',
   },
   toggleCircle: {
-    width: 24,
-    height: 24,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    position: 'absolute',
+    left: 5,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 5,
+    borderColor: '#FFFFFF',
+    shadowColor: 'rgba(8,8,8,0.26)',
+    shadowOffset: { width: 5, height: 2 },
+    shadowOpacity: 0.7,
+    shadowRadius: 7,
+    elevation: 3,
   },
   toggleCircleActive: {
-    transform: [{ translateX: 22 }],
+    transform: [{ translateX: 20 }],
+    backgroundColor: '#FFFFFF',
   },
   logoutButton: {
     backgroundColor: '#EF4444',
@@ -608,6 +618,22 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   logoutText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  deleteButton: {
+    backgroundColor: '#7F1D1D',
+    borderRadius: 12,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginBottom: 40,
+    gap: 12,
+  },
+  deleteText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',

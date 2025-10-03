@@ -21,6 +21,8 @@ interface OrderData {
   itemId: string;
   itemName: string;
   price: number;
+  originalPrice: number;
+  discountPrice?: number;
   imageUrl?: string;
   sellerId: string;
   sellerName: string;
@@ -58,7 +60,7 @@ export default function CreateOrderScreen() {
 
   useEffect(() => {
     if (!user) {
-      Alert.alert('خطأ', 'يجب تسجيل الدخول لإنشاء طلبية');
+      Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول لإنشاء طلبية');
       router.push('/login');
     }
   }, [user]);
@@ -86,7 +88,7 @@ export default function CreateOrderScreen() {
       console.log('🔗 إنشاء رابط إعادة بيع في قاعدة البيانات...');
       const row = await createResellLinkForItem(orderData.itemType, orderData.itemId, user.id, parseFloat(resellerPrice));
       console.log('✅ تم إنشاء رابط إعادة البيع:', row);
-              const url = `https://taziri.netlify.app/resell/${row.slug}`;
+              const url = `https://vermax.netlify.app/resell/${row.slug}`;
       console.log('🔗 الرابط المُنشأ:', url);
       setCreatedUrl(url);
       console.log('📱 تم تحديث حالة createdUrl:', url);
@@ -139,7 +141,17 @@ export default function CreateOrderScreen() {
             <Text style={styles.productType}>
               {orderData.itemType === 'product' ? 'منتج' : 'عرض'}
             </Text>
-            <Text style={styles.originalPrice}>السعر الأصلي: {orderData.price} دج</Text>
+            <Text style={styles.originalPrice}>
+              {orderData.discountPrice && orderData.discountPrice < orderData.originalPrice 
+                ? `السعر المخفض: ${orderData.price} دج` 
+                : `السعر: ${orderData.price} دج`
+              }
+            </Text>
+            {orderData.discountPrice && orderData.discountPrice < orderData.originalPrice && (
+              <Text style={styles.originalPriceStriked}>
+                السعر الأصلي: {orderData.originalPrice} دج
+              </Text>
+            )}
           </View>
         </View>
 
@@ -278,6 +290,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#059669',
     fontWeight: '600',
+  },
+  originalPriceStriked: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    textDecorationLine: 'line-through',
+    marginTop: 2,
   },
   sellerSection: {
     backgroundColor: '#FFFFFF',

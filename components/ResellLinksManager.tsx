@@ -52,7 +52,7 @@ export default function ResellLinksManager({ productIdProvider }: Props) {
       const row = await createResellLink(productId, user.id);
       
       await load();
-              const url = `https://taziri.netlify.app/resell/${row.slug}`;
+              const url = `https://vermax.netlify.app/resell/${row.slug}`;
       await Clipboard.setStringAsync(url);
       Alert.alert('تم الإنشاء', `تم إنشاء الرابط ونسخه للحافظة:\n${url}`);
     } catch (error) {
@@ -64,7 +64,7 @@ export default function ResellLinksManager({ productIdProvider }: Props) {
   };
 
   const handleCopy = async (slug: string) => {
-            const url = `https://taziri.netlify.app/resell/${slug}`;
+            const url = `https://vermax.netlify.app/resell/${slug}`;
     await Clipboard.setStringAsync(url);
     Alert.alert('نسخ', 'تم نسخ الرابط');
   };

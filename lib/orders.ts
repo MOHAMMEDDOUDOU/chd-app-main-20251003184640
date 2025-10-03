@@ -1,5 +1,5 @@
 import { db } from './database/config';
-import { orders, products, offers, users } from './database/config';
+import { orders, products, offers, users, sellers } from './database/config';
 import { eq } from 'drizzle-orm';
 import { NotificationService } from './notifications';
 
@@ -72,19 +72,64 @@ export async function getOrders() {
         // محاولة الحصول على معلومات البائع من sellerId
         if (order.sellerId) {
           try {
-            const seller = await db.query.users.findFirst({
-              where: eq(users.id, order.sellerId),
+            const seller = await db.query.sellers.findFirst({
+              where: eq(sellers.id, order.sellerId),
               columns: {
                 id: true,
-                fullName: true,
-                username: true,
+                name: true,
                 phoneNumber: true,
-                email: true,
               }
             });
             sellerInfo = seller;
           } catch (error) {
-            console.error('Error fetching seller info:', error);
+            console.error('❌ خطأ في تحميل معلومات البائع:', error);
+          }
+        } else {
+          // محاولة الحصول على البائع من المنتج/العرض المرتبط
+          try {
+            if (order.itemType === 'product') {
+              const product = await db.query.products.findFirst({
+                where: eq(products.id, order.itemId),
+                columns: {
+                  sellerId: true,
+                }
+              });
+              if (product?.sellerId) {
+                const seller = await db.query.sellers.findFirst({
+                  where: eq(sellers.id, product.sellerId),
+                  columns: {
+                    id: true,
+                    name: true,
+                    phoneNumber: true,
+                  }
+                });
+                if (seller) {
+                  sellerInfo = seller;
+                }
+              }
+            } else if (order.itemType === 'offer') {
+              const offer = await db.query.offers.findFirst({
+                where: eq(offers.id, order.itemId),
+                columns: {
+                  sellerId: true,
+                }
+              });
+              if (offer?.sellerId) {
+                const seller = await db.query.sellers.findFirst({
+                  where: eq(sellers.id, offer.sellerId),
+                  columns: {
+                    id: true,
+                    name: true,
+                    phoneNumber: true,
+                  }
+                });
+                if (seller) {
+                  sellerInfo = seller;
+                }
+              }
+            }
+          } catch (error) {
+            console.error('❌ خطأ في تحميل البائع من المنتج/العرض:', error);
           }
         }
         
@@ -98,7 +143,6 @@ export async function getOrders() {
                 fullName: true,
                 username: true,
                 phoneNumber: true,
-                email: true,
               }
             });
             buyerInfo = buyer;
@@ -138,14 +182,35 @@ export async function getOrders() {
           console.error('Error fetching original item info:', error);
         }
         
+        // محاولة الحصول على اسم البائع (الذي باع السلعة) من جدول المستخدمين باستخدام resellerUserId
+        let resellerName = order.sellerName;
+        if (!resellerName && order.resellerUserId) {
+          try {
+            const resellerUser = await db.query.users.findFirst({
+              where: eq(users.id, order.resellerUserId),
+              columns: {
+                fullName: true,
+              }
+            });
+            resellerName = resellerUser?.fullName || null;
+          } catch (error) {
+            console.error('❌ خطأ في تحميل اسم البائع من جدول المستخدمين:', error);
+          }
+        }
+
         const orderWithInfo = {
           ...order,
           seller: sellerInfo,
           buyer: buyerInfo,
           originalItem: originalItemInfo,
-          // استخدام sellerName من جدول الطلبات مباشرة
-          sellerName: order.sellerName || sellerInfo?.fullName || sellerInfo?.username
+          // البائع الذي اشتريت منه السلعة (من جدول sellers)
+          sellerName: sellerInfo?.name || null,
+          sellerPhone: sellerInfo?.phoneNumber || null,
+          // البائع الذي باع السلعة (من بيانات الطلبية الأصلية أو من جدول المستخدمين)
+          resellerName: resellerName || null,
+          resellerPhone: order.resellerPhone || null
         };
+        
         
 
         
@@ -302,10 +367,19 @@ export async function deleteOrder(id: string) {
 }
 
 // الحصول على الطلبات حسب الحالة
-export async function getOrdersByStatus(status: Order['status']) {
+export async function getOrdersByStatus(status: 'pending' | 'confirmed' | 'cancelled') {
   try {
+    // تحويل الحالة الإنجليزية إلى العربية
+    const statusMap = {
+      'pending': 'قيد المعالجة' as const,
+      'confirmed': 'تم التأكيد' as const, 
+      'cancelled': 'ملغي' as const
+    };
+    
+    const arabicStatus = statusMap[status];
+    
     const result = await db.query.orders.findMany({
-      where: eq(orders.status, status),
+      where: eq(orders.status, arabicStatus),
       orderBy: (orders, { desc }) => [desc(orders.createdAt)]
     });
     

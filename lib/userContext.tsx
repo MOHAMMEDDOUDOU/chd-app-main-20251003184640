@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+ 
 
 interface User {
   id: string;
@@ -32,6 +33,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const loadUserFromStorage = async () => {
     console.log('=== LOADING USER FROM STORAGE STARTED ===');
     try {
+      
+
       // التحقق من البيانات المزيفة أولاً
       console.log('Step 1: Checking for fake data...');
       const existingUserData = await AsyncStorage.getItem('user');

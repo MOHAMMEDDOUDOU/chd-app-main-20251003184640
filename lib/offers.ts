@@ -28,6 +28,7 @@ export interface CreateOfferData {
   sizes?: any;
   images?: any;
   category: string;
+  seller_id?: string;
 }
 
 export interface UpdateOfferData {
@@ -40,6 +41,7 @@ export interface UpdateOfferData {
   sizes?: any;
   images?: any;
   category?: string;
+  seller_id?: string;
 }
 
 // الحصول على جميع العروض
@@ -95,13 +97,14 @@ export async function createOffer(data: CreateOfferData) {
     const [newOffer] = await db.insert(offers).values({
       name: data.name,
       description: data.description,
-      price: data.price.toString(),
-      discountPrice: data.discount_price ? data.discount_price.toString() : null,
+      price: data.price,
+      discountPrice: data.discount_price,
       imageUrl: data.image_url,
       stockQuantity: data.stock_quantity,
       sizes: data.sizes,
       images: data.images,
       category: data.category,
+      sellerId: data.seller_id || null,
     }).returning();
     
     // إرسال إشعار فوري لجميع المستخدمين عن العرض الجديد
@@ -138,13 +141,14 @@ export async function updateOffer(id: string, data: UpdateOfferData) {
     
     if (data.name !== undefined) updateData.name = data.name;
     if (data.description !== undefined) updateData.description = data.description;
-    if (data.price !== undefined) updateData.price = data.price.toString();
-    if (data.discount_price !== undefined) updateData.discountPrice = data.discount_price ? data.discount_price.toString() : null;
+    if (data.price !== undefined) updateData.price = data.price;
+    if (data.discount_price !== undefined) updateData.discountPrice = data.discount_price;
     if (data.image_url !== undefined) updateData.imageUrl = data.image_url;
     if (data.stock_quantity !== undefined) updateData.stockQuantity = data.stock_quantity;
     if (data.sizes !== undefined) updateData.sizes = data.sizes;
     if (data.images !== undefined) updateData.images = data.images;
     if (data.category !== undefined) updateData.category = data.category;
+    if (data.seller_id !== undefined) updateData.sellerId = data.seller_id;
     
     const [updatedOffer] = await db.update(offers)
       .set(updateData)

@@ -22,7 +22,11 @@ export interface SendMessageInput {
 export async function getOrCreateConversation({ userId, adminId }: CreateConversationInput) {
   const existing = await db.select()
     .from(conversations)
-    .where(and(eq(conversations.userId, userId), eq(conversations.status, 'active')))
+    .where(and(
+      eq(conversations.userId, userId),
+      eq(conversations.adminId, adminId),
+      eq(conversations.status, 'active')
+    ))
     .limit(1);
 
   if (existing.length > 0) {
@@ -35,6 +39,20 @@ export async function getOrCreateConversation({ userId, adminId }: CreateConvers
     status: 'active'
   }).returning();
   return conv;
+}
+
+// Helper: get default admin (first active admin)
+export async function getDefaultAdmin() {
+  const admin = await db.select({
+    id: users.id,
+    username: users.username,
+    fullName: users.fullName,
+  })
+  .from(users)
+  .where(eq(users.role, 'admin'))
+  .limit(1);
+
+  return admin[0] || null;
 }
 
 export async function listMessages(conversationId: string, limit = 50, offset = 0) {

@@ -13,7 +13,7 @@ import {
 import { X, Save, Image as ImageIcon, Plus, Trash2 } from 'lucide-react-native';
 import { createOffer, updateOffer, Offer } from '../lib/offers';
 import { CloudinaryService } from '../lib/cloudinary';
-import * as ImagePicker from 'expo-image-picker';
+import { listSellers } from '../lib/sellers';
 
 interface OfferFormProps {
   visible: boolean;
@@ -36,6 +36,8 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [showDiscountPrice, setShowDiscountPrice] = useState(false);
+  const [sellers, setSellers] = useState<Array<{ id: string; name: string }>>([]);
+  const [showSellerPicker, setShowSellerPicker] = useState(false);
 
   // تحميل بيانات العرض للتعديل
   useEffect(() => {
@@ -73,6 +75,18 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
     }
   }, [offer, visible]);
 
+  useEffect(() => {
+    const loadSellers = async () => {
+      try {
+        const data = await listSellers();
+        setSellers(data);
+      } catch (error) {
+        console.error('Error loading sellers:', error);
+      }
+    };
+    loadSellers();
+  }, []);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -80,30 +94,6 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
     }));
   };
 
-  // اختيار صورة من المعرض
-  const pickImage = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('خطأ', 'نحتاج إذن المعرض لاختيار صورة');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        await uploadImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('خطأ', 'حدث خطأ في اختيار الصورة');
-    }
-  };
 
   // رفع الصورة إلى Cloudinary
   const uploadImage = async (imageUri: string) => {
@@ -195,6 +185,7 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
         stock_quantity: Number(formData.stock_quantity),
         category: 'عروض', // قيمة افتراضية للفئة
         image_url: formData.image_url.trim() || undefined,
+        seller_id: (formData as any).seller_id || undefined,
       };
 
       let result;
@@ -222,12 +213,13 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-    >
-      <View style={styles.container}>
+    <>
+      <Modal
+        visible={visible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -282,6 +274,20 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
               />
+            </View>
+
+            {/* Seller */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>البائع</Text>
+              <TouchableOpacity
+                style={styles.optionalButton}
+                onPress={() => setShowSellerPicker(true)}
+              >
+                <Plus size={16} color="#FF6B35" />
+                <Text style={styles.optionalButtonText}>
+                  {(formData as any).seller_name || 'اختر البائع'}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Optional Fields as Buttons */}
@@ -367,7 +373,7 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
               {/* زر إضافة الصور */}
               <TouchableOpacity 
                 style={[styles.professionalButton, uploadingImage && styles.disabledButton]} 
-                onPress={pickImage}
+                onPress={() => Alert.alert('معلومة', 'ميزة رفع الصور غير متاحة حالياً')}
                 disabled={uploadingImage}
               >
                 <View style={styles.buttonContent}>
@@ -389,9 +395,42 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
               </Text>
             </View>
           </View>
-        </ScrollView>
-      </View>
-    </Modal>
+          </ScrollView>
+        </View>
+      </Modal>
+      {/* Seller Picker Modal */}
+      <Modal visible={showSellerPicker} animationType="slide">
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setShowSellerPicker(false)}>
+              <X size={24} color="#666" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>اختر البائع</Text>
+            <View style={{ width: 20 }} />
+          </View>
+          <ScrollView style={styles.content}>
+            {sellers.length === 0 ? (
+              <Text style={styles.helpText}>لا توجد بائعون متاحون</Text>
+            ) : (
+              <View style={styles.formContainer}>
+                {sellers.map((seller) => (
+                  <TouchableOpacity
+                    key={seller.id}
+                    style={styles.optionalButton}
+                    onPress={() => {
+                      setFormData(prev => ({ ...(prev as any), seller_id: seller.id, seller_name: seller.name } as any));
+                      setShowSellerPicker(false);
+                    }}
+                  >
+                    <Text style={styles.optionalButtonText}>{seller.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+    </>
   );
 }
 

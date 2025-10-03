@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { User, UserPlus } from 'lucide-react-native';
+import { Alert } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,6 +22,11 @@ export default function WelcomeScreen() {
 
   const handleRegister = () => {
     router.push('/register');
+  };
+
+  const handleGuest = () => {
+    Alert.alert('الدخول كضيف', 'يمكنك التصفح كضيف. الميزات الحسابية تتطلب تسجيل الدخول.');
+    router.replace('/(tabs)');
   };
 
   return (
@@ -42,13 +48,13 @@ export default function WelcomeScreen() {
             <View style={styles.logoContainer}>
               <Image
                 source={{
-                  uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1756463555/logo-removebg-preview_p22obg.png'
+                  uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1757597539/VERMAX-removebg-preview_ss3uld.png'
                 }}
                 style={styles.logo}
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.appTitle}>taziri</Text>
+            <Text style={styles.appTitle}>vermax</Text>
             <Text style={styles.heroSubtitle}>
               منصة إعادة البيع الأولى في الجزائر
             </Text>
@@ -75,6 +81,15 @@ export default function WelcomeScreen() {
           >
             <UserPlus size={20} color="#FF6B35" />
             <Text style={styles.registerButtonText}>إنشاء حساب جديد</Text>
+          </TouchableOpacity>
+
+          {/* Continue as Guest */}
+          <TouchableOpacity
+            style={styles.guestButton}
+            onPress={handleGuest}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.guestButtonText}>المتابعة كضيف</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -191,5 +206,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FF6B35',
+  },
+  guestButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  guestButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
   },
 });

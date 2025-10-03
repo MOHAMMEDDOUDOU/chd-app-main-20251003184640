@@ -15,7 +15,7 @@ import { X, Save, Image as ImageIcon, Plus, Trash2 } from 'lucide-react-native';
 import { createProduct, updateProduct, Product } from '../lib/products';
 import { CloudinaryService } from '../lib/cloudinary';
 import { CategoryService, Category } from '../lib/categories';
-import * as ImagePicker from 'expo-image-picker';
+import { listSellers } from '../lib/sellers';
 
 interface ProductFormProps {
   visible: boolean;
@@ -40,6 +40,8 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
   const [uploadingImage, setUploadingImage] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [sellers, setSellers] = useState<Array<{ id: string; name: string }>>([]);
+  const [showSellerPicker, setShowSellerPicker] = useState(false);
 
   // تحميل الفئات
   useEffect(() => {
@@ -51,7 +53,16 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         console.error('Error loading categories:', error);
       }
     };
+    const loadSellers = async () => {
+      try {
+        const data = await listSellers();
+        setSellers(data);
+      } catch (error) {
+        console.error('Error loading sellers:', error);
+      }
+    };
     loadCategories();
+    loadSellers();
   }, []);
 
   // تحميل بيانات المنتج للتعديل
@@ -100,30 +111,6 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
 
 
 
-  // اختيار صورة من المعرض
-  const pickImage = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('خطأ', 'نحتاج إذن المعرض لاختيار صورة');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        await uploadImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('خطأ', 'حدث خطأ في اختيار الصورة');
-    }
-  };
 
   // رفع الصورة إلى Cloudinary - نسخة بسيطة
   const uploadImage = async (imageUri: string) => {
@@ -241,6 +228,7 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         stock_quantity: Number(formData.stock_quantity),
         category: formData.category.trim(),
         image_url: formData.image_url.trim() || undefined,
+        seller_id: (formData as any).seller_id || undefined,
       };
 
       console.log('📤 إرسال البيانات:', JSON.stringify(productData, null, 2));
@@ -328,6 +316,19 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
               >
                 <Text style={styles.categoryPickerText}>
                   {formData.category || 'اختر فئة المنتج'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* البائع */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>البائع</Text>
+              <TouchableOpacity
+                style={styles.categoryPickerButton}
+                onPress={() => setShowSellerPicker(true)}
+              >
+                <Text style={styles.categoryPickerText}>
+                  {(formData as any).seller_name || 'اختر البائع'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -431,7 +432,7 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
               {/* زر إضافة الصور */}
               <TouchableOpacity 
                 style={[styles.professionalButton, uploadingImage && styles.disabledButton]} 
-                onPress={pickImage}
+                onPress={() => Alert.alert('معلومة', 'ميزة رفع الصور غير متاحة حالياً')}
                 disabled={uploadingImage}
               >
                 <View style={styles.buttonContent}>
@@ -497,6 +498,50 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
                         {category.description}
                       </Text>
                     )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* Seller Picker Modal */}
+      <Modal visible={showSellerPicker} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>اختر البائع</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowSellerPicker(false)}
+            >
+              <X size={24} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            {sellers.length === 0 ? (
+              <Text style={styles.emptyText}>لا توجد بائعون متاحون</Text>
+            ) : (
+              <View style={styles.categoriesList}>
+                {sellers.map((seller) => (
+                  <TouchableOpacity
+                    key={seller.id}
+                    style={[
+                      styles.categoryItem,
+                      (formData as any).seller_id === seller.id && styles.selectedCategoryItem
+                    ]}
+                    onPress={() => {
+                      setFormData(prev => ({ ...(prev as any), seller_id: seller.id, seller_name: seller.name } as any));
+                      setShowSellerPicker(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.categoryItemText,
+                      (formData as any).seller_id === seller.id && styles.selectedCategoryItemText
+                    ]}>
+                      {seller.name}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>

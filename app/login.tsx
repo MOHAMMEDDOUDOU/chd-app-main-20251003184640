@@ -99,10 +99,17 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        enabled={Platform.OS === 'ios'}
         style={styles.keyboardView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          bounces={false}
+          alwaysBounceVertical={false}
+        >
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity
@@ -114,7 +121,7 @@ export default function LoginScreen() {
             <View style={styles.headerCenter}>
               <Image
                 source={{
-                  uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1756463555/logo-removebg-preview_p22obg.png'
+                  uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1757597539/VERMAX-removebg-preview_ss3uld.png'
                 }}
                 style={styles.headerLogo}
                 resizeMode="contain"
@@ -126,7 +133,7 @@ export default function LoginScreen() {
 
           {/* Form */}
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>مرحباً بك في taziri</Text>
+            <Text style={styles.formTitle}>مرحباً بك في vermax</Text>
             <Text style={styles.formSubtitle}>
               سجل دخولك لبدء رحلتك في عالم إعادة البيع
             </Text>
@@ -141,6 +148,8 @@ export default function LoginScreen() {
                 value={formData.username}
                 onChangeText={(value) => handleInputChange('username', value)}
                 autoCapitalize="none"
+                returnKeyType="next"
+                blurOnSubmit={false}
               />
             </View>
 
@@ -154,6 +163,7 @@ export default function LoginScreen() {
                 value={formData.password}
                 onChangeText={(value) => handleInputChange('password', value)}
                 secureTextEntry={!showPassword}
+                returnKeyType="done"
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -167,8 +177,6 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-
-
             {/* Login Button */}
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.disabledButton]}
@@ -180,12 +188,6 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
 
-
-
-
-
-
-
             {/* Register Link */}
             <View style={styles.registerLinkContainer}>
               <Text style={styles.registerLinkText}>ليس لديك حساب؟ </Text>
@@ -193,6 +195,17 @@ export default function LoginScreen() {
                 <Text style={styles.registerLink}>إنشاء حساب جديد</Text>
               </TouchableOpacity>
             </View>
+
+          {/* Continue as Guest (placed after register link) */}
+          <TouchableOpacity
+            style={styles.guestButton}
+            onPress={() => {
+              Alert.alert('الدخول كضيف', 'يمكنك التصفح كضيف، لتفعيل الميزات الحسابية يلزم تسجيل الدخول لاحقاً.');
+              router.replace('/(tabs)');
+            }}
+          >
+            <Text style={styles.guestButtonText}>المتابعة كضيف</Text>
+          </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -299,6 +312,19 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+
+  guestButton: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  guestButtonText: {
+    fontSize: 14,
+    color: '#1F2937',
+    fontWeight: '600',
   },
 
   registerLinkContainer: {

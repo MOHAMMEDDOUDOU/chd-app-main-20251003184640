@@ -140,7 +140,7 @@ export default function RegisterScreen() {
             <View style={styles.headerCenter}>
               <Image
                 source={{
-                  uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1756463555/logo-removebg-preview_p22obg.png'
+                  uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1757597539/VERMAX-removebg-preview_ss3uld.png'
                 }}
                 style={styles.headerLogo}
                 resizeMode="contain"
@@ -152,7 +152,7 @@ export default function RegisterScreen() {
 
           {/* Form */}
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>انضم إلى taziri</Text>
+            <Text style={styles.formTitle}>انضم إلى vermax</Text>
             <Text style={styles.formSubtitle}>
               ابدأ رحلتك في عالم إعادة البيع واربح من كل عملية بيع
             </Text>

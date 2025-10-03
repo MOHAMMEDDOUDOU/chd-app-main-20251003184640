@@ -8,7 +8,7 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
-import { Bell, Package, Tag, MessageSquare, Trash2, Check } from 'lucide-react-native';
+import { Bell, Package, Tag, MessageSquare, Check } from 'lucide-react-native';
 import { NotificationService } from '../lib/notifications';
 
 interface Notification {
@@ -79,36 +79,6 @@ export default function NotificationsList({ userId, onClose }: NotificationsList
     }
   };
 
-  const handleDeleteNotification = async (notificationId: string) => {
-    Alert.alert(
-      'حذف الإشعار',
-      'هل أنت متأكد من حذف هذا الإشعار؟',
-      [
-        { text: 'إلغاء', style: 'cancel' },
-        {
-          text: 'حذف',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await NotificationService.deleteNotification(notificationId);
-              
-              if (result.success) {
-                // إزالة الإشعار من القائمة
-                setNotifications(prev => 
-                  prev.filter(notification => notification.id !== notificationId)
-                );
-              } else {
-                Alert.alert('خطأ', result.error || 'فشل في حذف الإشعار');
-              }
-            } catch (error) {
-              console.error('Error deleting notification:', error);
-              Alert.alert('خطأ', 'حدث خطأ أثناء حذف الإشعار');
-            }
-          },
-        },
-      ]
-    );
-  };
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -245,12 +215,6 @@ export default function NotificationsList({ userId, onClose }: NotificationsList
                       <Check size={16} color="#3B82F6" />
                     </TouchableOpacity>
                   )}
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDeleteNotification(notification.id)}
-                  >
-                    <Trash2 size={16} color="#EF4444" />
-                  </TouchableOpacity>
                 </View>
               </View>
               <Text style={styles.notificationMessage}>{notification.message}</Text>
@@ -366,9 +330,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   markAsReadButton: {
-    padding: 4,
-  },
-  deleteButton: {
     padding: 4,
   },
   notificationMessage: {

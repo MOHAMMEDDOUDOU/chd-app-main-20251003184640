@@ -17,7 +17,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../lib/userContext';
-import { listAdminConversations, listMessages, sendMessage, getOrCreateAdminConversation } from '../lib/conversations';
+import { listAdminConversations, listMessages, sendMessage, getOrCreateAdminConversation, markAsRead } from '../lib/conversations';
 
 interface Props { onClose: () => void; }
 
@@ -165,6 +165,16 @@ export default function ChatsManagement(_: Props) {
         ...userData,
         id: conv.id
       });
+      
+      // Mark messages as read when opening conversation
+      await markAsRead(conv.id, user!.id);
+      
+      // Update conversations list to remove unread count immediately
+      setConversations(prev => prev.map(conv => 
+        conv.userId === userData.userId 
+          ? { ...conv, unreadCount: 0 }
+          : conv
+      ));
       
       const msgs = await listMessages(conv.id, 100, 0);
       setMessages(msgs);

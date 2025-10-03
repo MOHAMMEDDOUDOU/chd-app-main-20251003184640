@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Filter, Heart, Star, ShoppingCart, Bell, Menu, User } from 'lucide-react-native';
+import { Search, Filter, Star, ShoppingCart, Bell, Menu, User } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -27,6 +27,7 @@ import CategoriesList from '../../components/CategoriesList';
 import { useUser } from '../../lib/userContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NotificationsList from '../../components/NotificationsList';
+import { getOrCreateConversation, getDefaultAdmin } from '../../lib/conversations';
 
 import { NotificationService } from '../../lib/notifications';
 import { updateUserPushToken } from '../../lib/users';
@@ -92,16 +93,11 @@ export default function HomeScreen() {
   const [showChat, setShowChat] = useState(false);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [screenWidth, setScreenWidth] = useState(INITIAL_SCREEN_WIDTH);
-  const offersScrollRef = useRef<ScrollView>(null);
+  const carouselWidth = Math.max(0, screenWidth - 40); // يعوّض paddingHorizontal:20 في القسم
   const [offerIndex, setOfferIndex] = useState(0);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const offerCardWidth = Math.max(0, carouselWidth - 40); // تصغير أوضح: يساوي screenWidth - 80
 
-  const scrollToOffer = (index: number) => {
-    if (offersScrollRef.current && index >= 0 && index < offers.length) {
-      offersScrollRef.current.scrollTo({ x: index * screenWidth, animated: true });
-      setOfferIndex(index);
-    }
-  };
 
   // مراقبة تغييرات بيانات المستخدم
   useEffect(() => {
@@ -129,6 +125,23 @@ export default function HomeScreen() {
       console.log('HomeScreen - No user, showing User icon');
     }
   }, [user]);
+
+  // Auto-refresh unread messages count
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refreshUnreadCount = () => {
+      loadUnreadMessagesCount();
+    };
+
+    // Refresh immediately
+    refreshUnreadCount();
+
+    // Set up interval to refresh every 5 seconds
+    const interval = setInterval(refreshUnreadCount, 5000);
+
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   // Setup push notifications
   const setupPushNotifications = async () => {
@@ -173,17 +186,25 @@ export default function HomeScreen() {
     if (!user?.id) return;
     
     try {
-      const response = await fetch(`/api/messages?userId=${user.id}`, {
-        headers: {
-          'Authorization': `Bearer ${user.token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setUnreadMessagesCount(data.count || 0);
-      }
+      // Get conversation with admin
+      const admin = await getDefaultAdmin();
+      if (!admin) return;
+      
+      const conv = await getOrCreateConversation({ userId: user.id, adminId: admin.id });
+      
+      // Count unread messages where user is receiver
+      const { db, messages } = await import('../../lib/database/config');
+      const { eq, and } = await import('drizzle-orm');
+      
+      const unreadMessages = await db.select()
+        .from(messages)
+        .where(and(
+          eq(messages.conversationId, conv.id),
+          eq(messages.receiverId, user.id),
+          eq(messages.isRead, false)
+        ));
+      
+      setUnreadMessagesCount(unreadMessages.length);
     } catch (error) {
       console.error('Error loading unread messages count:', error);
     }
@@ -318,70 +339,28 @@ export default function HomeScreen() {
   // معالجة الضغط على زر "اطلب الآن" → الانتقال لصفحة إدخال السعر وإنشاء رابط إعادة البيع
   const handleOrderNow = async (item: Product | Offer, type: 'product' | 'offer') => {
     console.log('🛒 تم الضغط على "اطلب الآن"', { item, type, user });
-    
-    if (user) {
-      const orderData = {
-        itemType: type,
-        itemId: item.id,
-        itemName: item.name,
-        price: parseFloat((item as any).price),
-        imageUrl: (item as any).imageUrl,
-        sellerId: user.id,
-        sellerName: user.fullName || user.username,
-      };
-      router.push({ pathname: '/create-order', params: { data: JSON.stringify(orderData) } });
-    } else {
-      // المستخدم ضيف - الانتقال لصفحة تسجيل الدخول أو إنشاء طلب كضيف
-      console.log('👤 المستخدم ضيف، الانتقال لصفحة تسجيل الدخول');
-      Alert.alert(
-        'تسجيل الدخول مطلوب',
-        'هل تريد تسجيل الدخول لإنشاء طلبية أم المتابعة كضيف؟',
-        [
-          {
-            text: 'كضيف',
-            style: 'default',
-            onPress: () => {
-              const orderData = {
-                itemType: type,
-                itemId: item.id,
-                itemName: item.name,
-                price: parseFloat(item.price),
-                imageUrl: item.imageUrl,
-              };
-              
-              console.log('📋 بيانات الطلب كضيف:', orderData);
-              Alert.alert(
-                'إنشاء طلبية كضيف',
-                `سيتم إنشاء طلبية لـ ${item.name}\nالسعر: ${item.price} دج`,
-                [
-                  {
-                    text: 'إنشاء الطلبية',
-                    onPress: () => {
-                      // هنا سيتم إنشاء الطلبية كضيف
-                      console.log('✅ تم إنشاء الطلبية كضيف');
-                      Alert.alert('نجح', 'تم إنشاء الطلبية بنجاح!');
-                    }
-                  },
-                  {
-                    text: 'إلغاء',
-                    style: 'cancel'
-                  }
-                ]
-              );
-            }
-          },
-          {
-            text: 'تسجيل الدخول',
-            style: 'default',
-            onPress: () => router.push('/login')
-          },
-          {
-            text: 'إلغاء',
-            style: 'cancel'
-          }
-        ]
-      );
+    if (!user) {
+      Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول لإنشاء طلبية');
+      router.push('/login');
+      return;
     }
+
+    const originalPrice = parseFloat((item as any).price);
+    const discountPrice = (item as any).discountPrice ? parseFloat((item as any).discountPrice) : null;
+    const displayPrice = discountPrice && discountPrice < originalPrice ? discountPrice : originalPrice;
+    
+    const orderData = {
+      itemType: type,
+      itemId: item.id,
+      itemName: item.name,
+      price: displayPrice,
+      originalPrice: originalPrice,
+      discountPrice: discountPrice,
+      imageUrl: (item as any).imageUrl,
+      sellerId: user.id,
+      sellerName: user.fullName || user.username,
+    };
+    router.push({ pathname: '/create-order', params: { data: JSON.stringify(orderData) } });
   };
 
   const ProductCard = ({ product }: { product: Product }) => {
@@ -451,16 +430,7 @@ export default function HomeScreen() {
             style={[styles.productImage, { aspectRatio: imageAspectRatio }]}
             resizeMode="contain"
           />
-          <TouchableOpacity 
-            style={styles.likeButton}
-            onPress={() => toggleLike(product.id)}
-          >
-            <Heart 
-              size={20} 
-              color={product.isLiked ? "#FF6B6B" : "#FFFFFF"} 
-              fill={product.isLiked ? "#FF6B6B" : "transparent"}
-            />
-          </TouchableOpacity>
+          {/* Removed heart/favorite button as requested */}
           {product.discountPercentage && product.discountPercentage > 0 && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>-{product.discountPercentage}%</Text>
@@ -484,7 +454,14 @@ export default function HomeScreen() {
           
           <TouchableOpacity 
             style={styles.addToCartButton}
-            onPress={() => handleOrderNow(product, 'product')}
+            onPress={() => {
+              if (!user) {
+                Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول لطلب هذا المنتج');
+                router.push('/login');
+                return;
+              }
+              handleOrderNow(product, 'product');
+            }}
           >
             <LinearGradient
               colors={['#FF6B35', '#FF8C42']}
@@ -641,7 +618,14 @@ export default function HomeScreen() {
           </View>
           <TouchableOpacity 
             style={styles.offerButton}
-            onPress={() => handleOrderNow(offer, 'offer')}
+            onPress={() => {
+              if (!user) {
+                Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول لطلب هذا العرض');
+                router.push('/login');
+                return;
+              }
+              handleOrderNow(offer, 'offer');
+            }}
           >
             <Text style={styles.offerButtonText}>
               اطلب الآن
@@ -674,13 +658,13 @@ export default function HomeScreen() {
           <View style={styles.headerLeft}>
             <Image
               source={{
-                uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1756463555/logo-removebg-preview_p22obg.png'
+                uri: 'https://res.cloudinary.com/deh3ejeph/image/upload/v1757597539/VERMAX-removebg-preview_ss3uld.png'
               }}
               style={styles.headerLogo}
               resizeMode="contain"
             />
             <View style={styles.titleContainer}>
-              <Text style={styles.headerTitle}>taziri</Text>
+              <Text style={styles.headerTitle}>VERMAX</Text>
               <Text style={styles.headerSubtitle}>منصة إعادة البيع</Text>
             </View>
           </View>
@@ -688,7 +672,12 @@ export default function HomeScreen() {
           <View style={styles.headerActions}>
             <TouchableOpacity 
               style={styles.notificationButton}
-              onPress={() => setShowNotifications(true)}
+              onPress={() => {
+                if (user) setShowNotifications(true); else {
+                  Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول للوصول إلى الإشعارات');
+                  router.push('/login');
+                }
+              }}
             >
               <Bell size={22} color="#1F2937" />
               {unreadCount > 0 && (
@@ -701,7 +690,10 @@ export default function HomeScreen() {
             <TouchableOpacity 
               style={styles.chatButton}
               onPress={() => {
-                if (user) setShowChat(true); else router.push('/login');
+                if (user) setShowChat(true); else {
+                  Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول لاستخدام المحادثة');
+                  router.push('/login');
+                }
               }}
             >
               <Ionicons name="chatbubble-outline" size={22} color="#1F2937" />
@@ -752,6 +744,7 @@ export default function HomeScreen() {
                   });
                   router.push('/profile');
                 } else {
+                  Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول للوصول إلى الملف الشخصي');
                   console.log('No user found, navigating to login');
                   router.push('/login');
                 }
@@ -892,33 +885,44 @@ export default function HomeScreen() {
                 <ScrollView
                   horizontal
                   pagingEnabled
-                  ref={offersScrollRef}
                   showsHorizontalScrollIndicator={false}
-                  onMomentumScrollEnd={(event) => {
-                    const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
-                    setOfferIndex(index);
+                  decelerationRate="fast"
+                  snapToInterval={carouselWidth}
+                  snapToAlignment="center"
+                  scrollEventThrottle={16}
+                  onScroll={(event) => {
+                    const offset = event.nativeEvent.contentOffset.x;
+                    const index = Math.round(offset / carouselWidth);
+                    const clampedIndex = Math.max(0, Math.min(index, offers.length - 1));
+                    setOfferIndex(clampedIndex);
                   }}
-                  contentContainerStyle={styles.carouselContent}
+                  onMomentumScrollEnd={(event) => {
+                    const offset = event.nativeEvent.contentOffset.x;
+                    const index = Math.round(offset / carouselWidth);
+                    const clampedIndex = Math.max(0, Math.min(index, offers.length - 1));
+                    setOfferIndex(clampedIndex);
+                  }}
+                  contentContainerStyle={{ paddingHorizontal: 0 }}
                 >
-                  {offers.map(offer => (
-                    <View key={offer.id} style={{ width: screenWidth, alignItems: 'center' }}>
-                      <View style={[styles.carouselOfferCard, { width: screenWidth - 80 }]}>
+                  {offers.map((item, index) => (
+                    <View key={item.id} style={{ width: carouselWidth, alignItems: 'center' }}>
+                      <View style={[styles.carouselOfferCard, { width: offerCardWidth, marginHorizontal: 10 }]}>
                         <Image 
                           source={{ 
-                            uri: offer.imageUrl || 'https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg' 
+                            uri: item.imageUrl || 'https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg' 
                           }} 
                           style={styles.carouselOfferImage}
                           resizeMode="cover"
                         />
                         <View style={styles.heroOfferContent}>
-                          <Text style={styles.heroOfferTitle} numberOfLines={1}>{offer.name}</Text>
+                          <Text style={styles.heroOfferTitle} numberOfLines={1}>{item.name}</Text>
                           <View style={styles.heroOfferPriceContainer}>
-                            <Text style={styles.heroOfferPrice}>${parseFloat(offer.price).toFixed(2)}</Text>
-                            {offer.discountPrice && (
-                              <Text style={styles.heroOfferDiscountPrice}>${parseFloat(offer.discountPrice).toFixed(2)}</Text>
+                            <Text style={styles.heroOfferPrice}>${parseFloat(item.price).toFixed(2)}</Text>
+                            {item.discountPrice && (
+                              <Text style={styles.heroOfferDiscountPrice}>${parseFloat(item.discountPrice).toFixed(2)}</Text>
                             )}
                           </View>
-                          <TouchableOpacity style={styles.heroOfferButton} onPress={() => handleOrderNow(offer, 'offer')}>
+                          <TouchableOpacity style={styles.heroOfferButton} onPress={() => handleOrderNow(item, 'offer')}>
                             <Text style={styles.heroOfferButtonText}>اطلب الآن</Text>
                           </TouchableOpacity>
                         </View>
@@ -928,36 +932,7 @@ export default function HomeScreen() {
                 </ScrollView>
               </View>
               
-              {/* أزرار التنقل */}
-              <View style={styles.navigationButtons}>
-                <TouchableOpacity 
-                  style={[styles.navButton, offerIndex === 0 && styles.navButtonDisabled]}
-                  onPress={() => scrollToOffer(offerIndex - 1)}
-                  disabled={offerIndex === 0}
-                >
-                  <Text style={[styles.navButtonText, offerIndex === 0 && styles.navButtonTextDisabled]}>‹</Text>
-                </TouchableOpacity>
-                
-                <View style={styles.dotsContainer}>
-                  {offers.map((_, index) => (
-                    <View 
-                      key={index} 
-                      style={[
-                        styles.dot, 
-                        index === offerIndex && styles.activeDot
-                      ]} 
-                    />
-                  ))}
-                </View>
-                
-                <TouchableOpacity 
-                  style={[styles.navButton, offerIndex === offers.length - 1 && styles.navButtonDisabled]}
-                  onPress={() => scrollToOffer(offerIndex + 1)}
-                  disabled={offerIndex === offers.length - 1}
-                >
-                  <Text style={[styles.navButtonText, offerIndex === offers.length - 1 && styles.navButtonTextDisabled]}>›</Text>
-                </TouchableOpacity>
-              </View>
+              
             </View>
           </View>
         )}
@@ -1035,7 +1010,11 @@ export default function HomeScreen() {
       {showChat && user && (
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <ChatModal onClose={() => setShowChat(false)} />
+            <ChatModal onClose={() => {
+              setShowChat(false);
+              // Refresh unread count when chat is closed
+              loadUnreadMessagesCount();
+            }} />
           </View>
         </View>
       )}
@@ -1305,45 +1284,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
   },
-  navigationButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 15,
-  },
-  navButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FF6B35',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  navButtonDisabled: {
-    backgroundColor: '#E5E7EB',
-  },
-  navButtonText: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  navButtonTextDisabled: {
-    color: '#9CA3AF',
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E5E7EB',
-  },
-  activeDot: {
-    backgroundColor: '#FF6B35',
-  },
+  
   heroOfferContent: {
     padding: 12,
   },

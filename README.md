@@ -1,4 +1,4 @@
-# taziri - تطبيق تسوق إلكتروني
+# vermax - تطبيق تسوق إلكتروني
 
 تطبيق تسوق إلكتروني متكامل مبني بـ React Native و Expo مع قاعدة بيانات PostgreSQL.
 
@@ -32,7 +32,7 @@
 1. **استنساخ المشروع**
 ```bash
 git clone <repository-url>
-cd taziri
+cd vermax
 ```
 
 2. **تثبيت التبعيات**
@@ -53,7 +53,7 @@ npm run dev
 ## هيكل المشروع
 
 ```
-taziri/
+vermax/
 ├── app/                    # صفحات التطبيق
 │   ├── (tabs)/            # صفحات التبويب
 │   └── _layout.tsx        # تخطيط التطبيق

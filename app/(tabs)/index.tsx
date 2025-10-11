@@ -1019,16 +1019,21 @@ export default function HomeScreen() {
           </View>
         </View>
       )}
-      {/* WhatsApp Floating Button */}
+      {/* WhatsApp Floating Button only on Home screen */}
       <TouchableOpacity
         style={styles.whatsappFab}
         activeOpacity={0.8}
-        onPress={() => {
-          const phone = '+213562163035';
-          const url = `whatsapp://send?phone=${phone}`;
-          Linking.openURL(url).catch(() => {
-            Alert.alert('خطأ', 'تعذر فتح واتساب');
-          });
+        onPress={async () => {
+          const phone = '213562163035';
+          const waUrl = `whatsapp://send?phone=${phone}`;
+          const webUrl = `https://wa.me/${phone}`;
+          try {
+            const canOpen = await Linking.canOpenURL(waUrl);
+            if (canOpen) await Linking.openURL(waUrl);
+            else await Linking.openURL(webUrl);
+          } catch (e) {
+            await Linking.openURL(webUrl);
+          }
         }}
       >
         <Image

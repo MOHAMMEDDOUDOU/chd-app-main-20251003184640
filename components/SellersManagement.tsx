@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, Modal } from 'react-native';
-import { createSeller, listSellers, deleteSeller } from '../lib/sellers';
+import { createSeller, listSellers, deleteSeller, updateSeller } from '../lib/sellers';
 
 interface Props { onClose: () => void }
 
 export default function SellersManagement(_: Props) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSeller, setEditingSeller] = useState<any | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -31,14 +34,51 @@ export default function SellersManagement(_: Props) {
     }
     setSaving(true);
     try {
-      const res = await createSeller({ name: name.trim(), phoneNumber: phone.trim() || undefined });
+      const res = await createSeller({ name: name.trim(), phoneNumber: phone.trim() || undefined, location: location.trim() || undefined });
       if (res.success) {
         setName('');
         setPhone('');
+        setLocation('');
         setShowModal(false);
         await load();
       } else {
         Alert.alert('خطأ', res.error || 'فشل إضافة البائع');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openEdit = (seller: any) => {
+    setEditingSeller(seller);
+    setName(seller.name || '');
+    setPhone(seller.phoneNumber || '');
+    setLocation(seller.location || '');
+    setShowEditModal(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingSeller) return;
+    if (!name.trim()) {
+      Alert.alert('تنبيه', 'اسم البائع مطلوب');
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await updateSeller(editingSeller.id, {
+        name: name.trim(),
+        phoneNumber: phone.trim() || undefined,
+        location: location.trim() || undefined,
+      });
+      if (res.success) {
+        setShowEditModal(false);
+        setEditingSeller(null);
+        setName('');
+        setPhone('');
+        setLocation('');
+        await load();
+      } else {
+        Alert.alert('خطأ', res.error || 'فشل تعديل البائع');
       }
     } finally {
       setSaving(false);
@@ -96,9 +136,15 @@ export default function SellersManagement(_: Props) {
           <View style={styles.card}>
             <Text style={styles.name}>{item.name}</Text>
             {item.phoneNumber ? <Text style={styles.phone}>+213 {item.phoneNumber}</Text> : null}
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item.id)}>
-              <Text style={styles.deleteText}>حذف</Text>
-            </TouchableOpacity>
+            {item.location ? <Text style={styles.location}>المكان: {item.location}</Text> : null}
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+              <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(item)}>
+                <Text style={styles.editText}>تعديل</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item.id)}>
+                <Text style={styles.deleteText}>حذف</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
         ListEmptyComponent={!loading ? <Text style={styles.empty}>لا يوجد بائعون</Text> : null}
@@ -111,11 +157,32 @@ export default function SellersManagement(_: Props) {
             <Text style={styles.modalTitle}>إضافة بائع</Text>
             <TextInput style={styles.input} placeholder="اسم البائع (إجباري)" value={name} onChangeText={setName} />
             <TextInput style={styles.input} placeholder="رقم الهاتف (اختياري)" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+            <TextInput style={styles.input} placeholder="المكان (اختياري)" value={location} onChangeText={setLocation} />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowModal(false); }}>
                 <Text style={styles.cancelText}>إلغاء</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.modalSaveBtn, saving && styles.disabled]} onPress={handleAdd} disabled={saving}>
+                <Text style={styles.modalSaveText}>{saving ? 'جاري الحفظ...' : 'حفظ'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Seller Modal */}
+      <Modal visible={showEditModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>تعديل البائع</Text>
+            <TextInput style={styles.input} placeholder="اسم البائع (إجباري)" value={name} onChangeText={setName} />
+            <TextInput style={styles.input} placeholder="رقم الهاتف (اختياري)" keyboardType="phone-pad" value={phone} onChangeText={setPhone} />
+            <TextInput style={styles.input} placeholder="المكان (اختياري)" value={location} onChangeText={setLocation} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowEditModal(false); setEditingSeller(null); }}>
+                <Text style={styles.cancelText}>إلغاء</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalSaveBtn, saving && styles.disabled]} onPress={handleEditSave} disabled={saving}>
                 <Text style={styles.modalSaveText}>{saving ? 'جاري الحفظ...' : 'حفظ'}</Text>
               </TouchableOpacity>
             </View>
@@ -137,6 +204,9 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, padding: 12, marginBottom: 10 },
   name: { fontSize: 16, fontWeight: '600', color: '#1F2937' },
   phone: { marginTop: 4, color: '#374151' },
+  location: { marginTop: 2, color: '#6B7280' },
+  editBtn: { backgroundColor: '#3B82F6', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 6 },
+  editText: { color: '#FFFFFF', fontWeight: '600' },
   deleteBtn: { marginTop: 8, alignSelf: 'flex-start', backgroundColor: '#EF4444', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 6 },
   deleteText: { color: '#FFFFFF', fontWeight: '600' },
   empty: { textAlign: 'center', color: '#6B7280', marginTop: 20 },

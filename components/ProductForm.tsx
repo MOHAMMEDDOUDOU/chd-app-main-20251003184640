@@ -66,24 +66,43 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
     loadSellers();
   }, []);
 
-  // تحميل بيانات المنتج للتعديل
+  // تحميل بيانات المنتج للتعديل (يدعم snake_case و camelCase)
   useEffect(() => {
     if (product) {
-      setFormData({
-        name: product.name || '',
-        description: product.description || '',
-        price: product.price?.toString() || '',
-        discount_price: product.discount_price?.toString() || '',
-        stock_quantity: product.stock_quantity?.toString() || '',
-        category: product.category || '',
-        image_url: product.image_url || '',
-      });
-      // تحميل الصور المتعددة إذا كانت موجودة
-      if (product.image_url) {
-        setImages([product.image_url]);
+      const p: any = product as any;
+      const imageUrl = p.image_url ?? p.imageUrl ?? '';
+      const stockQty = p.stock_quantity ?? p.stockQuantity;
+      const discountPrice = p.discount_price ?? p.discountPrice;
+
+      // تهيئة النموذج
+      setFormData(prev => ({
+        ...prev,
+        name: p.name || '',
+        description: p.description || '',
+        price: (p.price !== undefined && p.price !== null) ? String(p.price) : '',
+        discount_price: (discountPrice !== undefined && discountPrice !== null) ? String(discountPrice) : '',
+        stock_quantity: (stockQty !== undefined && stockQty !== null) ? String(stockQty) : '',
+        category: p.category || '',
+        image_url: imageUrl,
+        ...(p.seller_id || p.sellerId ? { seller_id: p.seller_id ?? p.sellerId } : {}),
+      } as any));
+
+      // الصور المتعددة
+      const imagesFromDb: string[] | undefined = Array.isArray(p.images) ? p.images : undefined;
+      if (imagesFromDb && imagesFromDb.length > 0) {
+        setImages(imagesFromDb);
+        // إذا لم تكن هناك صورة رئيسية، اجعل الأولى رئيسية
+        if (!imageUrl) {
+          setFormData(prev => ({ ...(prev as any), image_url: imagesFromDb[0] } as any));
+        }
+      } else if (imageUrl) {
+        setImages([imageUrl]);
       } else {
         setImages([]);
       }
+
+      // إظهار حقل التخفيض إذا كان موجوداً
+      setShowDiscountPrice(!!discountPrice);
     } else {
       // إعادة تعيين النموذج للمنتج الجديد
       setFormData({
@@ -96,8 +115,21 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         image_url: '',
       });
       setImages([]);
+      setShowDiscountPrice(false);
     }
   }, [product, visible]);
+
+  // عند تحميل قائمة البائعين، عرّف اسم البائع إن كان seller_id موجوداً
+  useEffect(() => {
+    const currentSellerId = (formData as any).seller_id;
+    const currentSellerName = (formData as any).seller_name;
+    if (currentSellerId && !currentSellerName && sellers.length > 0) {
+      const found = sellers.find(s => s.id === currentSellerId);
+      if (found) {
+        setFormData(prev => ({ ...(prev as any), seller_name: found.name } as any));
+      }
+    }
+  }, [sellers, formData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -229,7 +261,7 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         discount_percentage = Math.round(((originalPrice - discountPrice) / originalPrice) * 100);
       }
 
-      const productData = {
+      const productData: any = {
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         price: Number(formData.price),
@@ -238,6 +270,7 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         stock_quantity: Number(formData.stock_quantity),
         category: formData.category.trim(),
         image_url: formData.image_url.trim() || undefined,
+        images: images && images.length > 0 ? images : undefined,
         seller_id: (formData as any).seller_id || undefined,
       };
 

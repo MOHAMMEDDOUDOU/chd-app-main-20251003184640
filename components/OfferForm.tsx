@@ -40,26 +40,40 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
   const [sellers, setSellers] = useState<Array<{ id: string; name: string }>>([]);
   const [showSellerPicker, setShowSellerPicker] = useState(false);
 
-  // تحميل بيانات العرض للتعديل
+  // تحميل بيانات العرض للتعديل (يدعم snake_case و camelCase)
   useEffect(() => {
     if (offer) {
-      setFormData({
-        name: offer.name || '',
-        description: offer.description || '',
-        price: offer.price.toString() || '',
-        discount_price: offer.discount_price?.toString() || '',
-        stock_quantity: offer.stock_quantity?.toString() || '',
-        image_url: offer.image_url || '',
-      });
-      // تحميل الصور المتعددة إذا كانت موجودة
-      if (offer.image_url) {
-        setImages([offer.image_url]);
+      const o: any = offer as any;
+      const imageUrl = o.image_url ?? o.imageUrl ?? '';
+      const stockQty = o.stock_quantity ?? o.stockQuantity;
+      const discountPrice = o.discount_price ?? o.discountPrice;
+
+      setFormData(prev => ({
+        ...prev,
+        name: o.name || '',
+        description: o.description || '',
+        price: (o.price !== undefined && o.price !== null) ? String(o.price) : '',
+        discount_price: (discountPrice !== undefined && discountPrice !== null) ? String(discountPrice) : '',
+        stock_quantity: (stockQty !== undefined && stockQty !== null) ? String(stockQty) : '',
+        image_url: imageUrl,
+        ...(o.seller_id || o.sellerId ? { seller_id: o.seller_id ?? o.sellerId } : {}),
+      } as any));
+
+      const imagesFromDb: string[] | undefined = Array.isArray(o.images) ? o.images : undefined;
+      if (imagesFromDb && imagesFromDb.length > 0) {
+        setImages(imagesFromDb);
+        if (!imageUrl) {
+          setFormData(prev => ({ ...(prev as any), image_url: imagesFromDb[0] } as any));
+        }
+      } else if (imageUrl) {
+        setImages([imageUrl]);
       } else {
         setImages([]);
       }
+
       // إظهار الحقول الاختيارية إذا كانت تحتوي على بيانات
-      setShowDescription(!!offer.description);
-      setShowDiscountPrice(!!offer.discount_price);
+      setShowDescription(!!o.description);
+      setShowDiscountPrice(!!discountPrice);
     } else {
       // إعادة تعيين النموذج للعرض الجديد
       setFormData({
@@ -75,6 +89,18 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
       setShowDiscountPrice(false);
     }
   }, [offer, visible]);
+
+  // عند تحميل البائعين، استرجاع اسم البائع إن كان seller_id موجوداً
+  useEffect(() => {
+    const currentSellerId = (formData as any).seller_id;
+    const currentSellerName = (formData as any).seller_name;
+    if (currentSellerId && !currentSellerName && sellers.length > 0) {
+      const found = sellers.find(s => s.id === currentSellerId);
+      if (found) {
+        setFormData(prev => ({ ...(prev as any), seller_name: found.name } as any));
+      }
+    }
+  }, [sellers, formData]);
 
   useEffect(() => {
     const loadSellers = async () => {
@@ -186,7 +212,7 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
         }
       }
 
-      const offerData = {
+      const offerData: any = {
         name: formData.name.trim(),
         description: formData.description.trim(),
         price: Number(formData.price),
@@ -195,6 +221,7 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
         stock_quantity: Number(formData.stock_quantity),
         category: 'عروض', // قيمة افتراضية للفئة
         image_url: formData.image_url.trim() || undefined,
+        images: images && images.length > 0 ? images : undefined,
         seller_id: (formData as any).seller_id || undefined,
       };
 

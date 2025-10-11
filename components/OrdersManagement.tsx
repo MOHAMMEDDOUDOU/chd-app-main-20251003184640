@@ -209,6 +209,8 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                   setShowDetailsModal(false);
                   setSelectedOrderForDetails(null);
                 }
+                // إعادة تحميل الطلبات من قاعدة البيانات لضمان التزامن
+                await loadOrders();
               } else {
                 Alert.alert('خطأ', result.error || 'فشل في حذف الطلب');
               }

@@ -87,13 +87,18 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         ...(p.seller_id || p.sellerId ? { seller_id: p.seller_id ?? p.sellerId } : {}),
       } as any));
 
-      // الصور المتعددة
-      const imagesFromDb: string[] | undefined = Array.isArray(p.images) ? p.images : undefined;
-      if (imagesFromDb && imagesFromDb.length > 0) {
-        setImages(imagesFromDb);
+      // الصور المتعددة (تطبيع القيم سواء كانت نصوصاً أو كائنات)
+      const imagesFromDbRaw: any[] | undefined = Array.isArray(p.images) ? p.images : undefined;
+      const normalizedImages: string[] = imagesFromDbRaw
+        ? imagesFromDbRaw
+            .map((img: any) => (typeof img === 'string' ? img : (img?.url || img?.image_url || img?.imageUrl)))
+            .filter(Boolean)
+        : [];
+      if (normalizedImages.length > 0) {
+        setImages(normalizedImages);
         // إذا لم تكن هناك صورة رئيسية، اجعل الأولى رئيسية
         if (!imageUrl) {
-          setFormData(prev => ({ ...(prev as any), image_url: imagesFromDb[0] } as any));
+          setFormData(prev => ({ ...(prev as any), image_url: normalizedImages[0] } as any));
         }
       } else if (imageUrl) {
         setImages([imageUrl]);

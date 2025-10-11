@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { Stack, Slot } from 'expo-router';
-import { I18nManager, Platform } from 'react-native';
+import { Stack } from 'expo-router';
+import { I18nManager, Linking, Platform, TouchableOpacity, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { UserProvider } from '../lib/userContext';
 import { AdminProvider } from '../lib/adminContext';
 import NotificationHandler from '../components/NotificationHandler';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -24,6 +25,19 @@ export default function RootLayout() {
     }
   }, []);
 
+  const openWhatsApp = async () => {
+    const phone = '213562163035';
+    const waUrl = `whatsapp://send?phone=${phone}`;
+    const webUrl = `https://wa.me/${phone}`;
+    try {
+      const canOpen = await Linking.canOpenURL(waUrl);
+      if (canOpen) await Linking.openURL(waUrl);
+      else await Linking.openURL(webUrl);
+    } catch (e) {
+      await Linking.openURL(webUrl);
+    }
+  };
+
   return (
     <NotificationHandler>
       <UserProvider>
@@ -38,6 +52,31 @@ export default function RootLayout() {
             <Stack.Screen name="create-order" />
             <Stack.Screen name="+not-found" />
           </Stack>
+          {/* WhatsApp Floating Action Button */}
+          <View
+            pointerEvents="box-none"
+            style={{ position: 'absolute', right: 16, bottom: 24 }}
+          >
+            <TouchableOpacity
+              onPress={openWhatsApp}
+              activeOpacity={0.8}
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: '#25D366',
+                justifyContent: 'center',
+                alignItems: 'center',
+                shadowColor: '#000',
+                shadowOpacity: 0.25,
+                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: 6,
+              }}
+            >
+              <Ionicons name="logo-whatsapp" size={28} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
           <StatusBar style="auto" />
         </AdminProvider>
       </UserProvider>

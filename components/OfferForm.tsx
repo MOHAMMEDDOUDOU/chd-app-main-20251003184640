@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { X, Save, Image as ImageIcon, Plus, Trash2 } from 'lucide-react-native';
+import * as DocumentPicker from 'expo-document-picker';
 import { createOffer, updateOffer, Offer } from '../lib/offers';
 import { CloudinaryService } from '../lib/cloudinary';
 import { listSellers } from '../lib/sellers';
@@ -95,13 +96,22 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
   };
 
 
-  // رفع الصورة إلى Cloudinary
-  const uploadImage = async (imageUri: string) => {
+  // اختيار ملف من الجهاز ثم رفعه إلى Cloudinary
+  const pickAndUploadImage = async () => {
     try {
       setUploadingImage(true);
-      
+      // اختيار ملف صورة
+      const result = await DocumentPicker.getDocumentAsync({ type: 'image/*', multiple: false });
+      if (result.canceled) {
+        return;
+      }
+      const asset = result.assets?.[0];
+      if (!asset?.uri) {
+        Alert.alert('خطأ', 'تعذر الحصول على ملف الصورة');
+        return;
+      }
       console.log('🚀 بدء رفع الصورة...');
-      const imageUrl = await CloudinaryService.uploadImage(imageUri, 'offers');
+      const imageUrl = await CloudinaryService.uploadImage(asset.uri, 'offers');
       
       // إضافة الصورة إلى قائمة الصور
       setImages(prev => [...prev, imageUrl]);
@@ -373,7 +383,7 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
               {/* زر إضافة الصور */}
               <TouchableOpacity 
                 style={[styles.professionalButton, uploadingImage && styles.disabledButton]} 
-                onPress={() => Alert.alert('معلومة', 'ميزة رفع الصور غير متاحة حالياً')}
+                onPress={pickAndUploadImage}
                 disabled={uploadingImage}
               >
                 <View style={styles.buttonContent}>

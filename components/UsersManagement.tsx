@@ -90,21 +90,22 @@ export default function UsersManagement(_: Props) {
               <TouchableOpacity onPress={() => setShowOrdersModal(false)}><Text style={{ color: '#EF4444', fontWeight: '700' }}>إغلاق</Text></TouchableOpacity>
             </View>
 
-            <ScrollView style={{ padding: 16 }}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
               {userOrders.length === 0 ? (
                 <View style={styles.center}><Text style={styles.muted}>لا توجد طلبيات</Text></View>
               ) : (
                 userOrders.map((o) => {
-                  const original = Number(o.unitPrice);
+                  // السعر الأصلي الصحيح من العنصر الأصلي (product/offer) إن وُجد
+                  const baseOriginal = (o.originalItem?.price != null) ? Number(o.originalItem.price) : Number(o.unitPrice);
                   const resell = Number(o.resellerPrice || o.unitPrice);
                   const qty = Number(o.quantity || 1);
-                  const profitPerUnit = Math.max(0, resell - original);
+                  const profitPerUnit = Math.max(0, resell - baseOriginal);
                   const totalProfit = profitPerUnit * qty;
                   return (
                     <View key={o.id} style={styles.orderCard}>
                       <View style={styles.orderRow}><Text style={styles.orderLabel}>المنتج/العرض:</Text><Text style={styles.orderValue}>{o.itemName}</Text></View>
                       <View style={styles.orderRow}><Text style={styles.orderLabel}>الكمية:</Text><Text style={styles.orderValue}>{qty}</Text></View>
-                      <View style={styles.orderRow}><Text style={styles.orderLabel}>السعر الأصلي:</Text><Text style={styles.orderValue}>{original.toLocaleString()} دج</Text></View>
+                      <View style={styles.orderRow}><Text style={styles.orderLabel}>السعر الأصلي:</Text><Text style={styles.orderValue}>{baseOriginal.toLocaleString()} دج</Text></View>
                       <View style={styles.orderRow}><Text style={styles.orderLabel}>سعر إعادة البيع:</Text><Text style={styles.orderValue}>{resell.toLocaleString()} دج</Text></View>
                       <View style={styles.orderRow}><Text style={styles.orderLabel}>الحالة:</Text><Text style={styles.orderValue}>{o.status}</Text></View>
                       <View style={[styles.orderRow, { borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 8 }]}>

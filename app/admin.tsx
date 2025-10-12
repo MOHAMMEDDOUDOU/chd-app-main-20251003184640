@@ -165,14 +165,9 @@ export default function AdminScreen() {
           <ScrollView style={styles.sectionContainer}>{renderSection()}</ScrollView>
         )}
         {/* Floating Chat Button across all admin sections */}
-        <TouchableOpacity style={styles.chatFab} activeOpacity={0.85} onPress={() => setShowChat(true)}>
+        <TouchableOpacity style={styles.chatFab} activeOpacity={0.85} onPress={() => setCurrentSection('chats')}>
           <Ionicons name="chatbubbles-outline" size={22} color="#FFFFFF" />
         </TouchableOpacity>
-        {showChat && (
-          <View style={styles.modalOverlay}>
-            <AdminChatModal onClose={() => setShowChat(false)} />
-          </View>
-        )}
       </View>
       
     </SafeAreaView>

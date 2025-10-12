@@ -428,7 +428,34 @@ export async function getOrdersByResellerUser(userId: string) {
       orderBy: (orders, { desc }) => [desc(orders.createdAt)]
     });
 
-    return { success: true, orders: result };
+    // إرفاق معلومات المنتج/العرض الأصلي (للحصول على السعر الأصلي بشكل صحيح)
+    const enriched = await Promise.all(result.map(async (order) => {
+      let originalItemInfo: any = null;
+      try {
+        if (order.itemType === 'product') {
+          const product = await db.query.products.findFirst({
+            where: eq(products.id, order.itemId),
+            columns: { id: true, name: true, price: true, discountPrice: true }
+          });
+          originalItemInfo = product;
+        } else if (order.itemType === 'offer') {
+          const offer = await db.query.offers.findFirst({
+            where: eq(offers.id, order.itemId),
+            columns: { id: true, name: true, price: true, discountPrice: true }
+          });
+          originalItemInfo = offer;
+        }
+      } catch (e) {
+        // ignore enrichment errors
+      }
+
+      return {
+        ...order,
+        originalItem: originalItemInfo,
+      };
+    }));
+
+    return { success: true, orders: enriched };
   } catch (error) {
     console.error('Error fetching orders by reseller user:', error);
     return { success: false, error: 'فشل في تحميل طلبات المستخدم' };

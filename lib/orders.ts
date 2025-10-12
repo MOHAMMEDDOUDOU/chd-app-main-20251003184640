@@ -419,3 +419,18 @@ export async function getOrdersByStatus(
     };
   }
 }
+
+// الحصول على الطلبات الخاصة بمستخدم (كبائع/مُعيد بيع)
+export async function getOrdersByResellerUser(userId: string) {
+  try {
+    const result = await db.query.orders.findMany({
+      where: eq(orders.resellerUserId, userId),
+      orderBy: (orders, { desc }) => [desc(orders.createdAt)]
+    });
+
+    return { success: true, orders: result };
+  } catch (error) {
+    console.error('Error fetching orders by reseller user:', error);
+    return { success: false, error: 'فشل في تحميل طلبات المستخدم' };
+  }
+}

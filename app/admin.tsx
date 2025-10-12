@@ -18,6 +18,7 @@ import OffersManagement from '../components/OffersManagement';
 import OrdersManagement from '../components/OrdersManagement';
 import CategoriesManagement from '../components/CategoriesManagement';
 import ChatsManagement from '../components/ChatsManagement';
+import AdminChatModal from '../components/AdminChatModal';
 import UsersManagement from '../components/UsersManagement';
 import SellersManagement from '../components/SellersManagement';
 
@@ -26,6 +27,7 @@ export default function AdminScreen() {
   const router = useRouter();
   const { user, logout } = useUser();
   const { isAdmin, currentSection, setCurrentSection } = useAdmin();
+  const [showChat, setShowChat] = React.useState(false);
 
   // التحقق من أن المستخدم أدمن
   React.useEffect(() => {
@@ -162,6 +164,15 @@ export default function AdminScreen() {
         ) : (
           <ScrollView style={styles.sectionContainer}>{renderSection()}</ScrollView>
         )}
+        {/* Floating Chat Button across all admin sections */}
+        <TouchableOpacity style={styles.chatFab} activeOpacity={0.85} onPress={() => setShowChat(true)}>
+          <Ionicons name="chatbubbles-outline" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+        {showChat && (
+          <View style={styles.modalOverlay}>
+            <AdminChatModal onClose={() => setShowChat(false)} />
+          </View>
+        )}
       </View>
       
     </SafeAreaView>
@@ -230,6 +241,33 @@ const styles = StyleSheet.create({
   sectionContainer: {
     flex: 1,
     padding: 20,
+  },
+  chatFab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FF6B35',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
   },
   sectionContent: {
     backgroundColor: '#FFFFFF',

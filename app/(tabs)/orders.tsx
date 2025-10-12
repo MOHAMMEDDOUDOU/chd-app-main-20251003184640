@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Package, Clock, CheckCircle, XCircle, MessageCircle, X } from 'lucide-react-native';
 import { useUser } from '../../lib/userContext';
 import { getOrders } from '../../lib/orders';
+import { useRouter } from 'expo-router';
 
 interface Order {
   id: string;
@@ -34,6 +35,7 @@ interface Order {
 }
 
 export default function UserOrdersScreen() {
+  const router = useRouter();
   const { user } = useUser();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,20 +47,20 @@ export default function UserOrdersScreen() {
     try {
       setLoading(true);
       const result = await getOrders();
-      
       if (result.success && result.orders) {
-        // تصفية الطلبات للمستخدم الحالي
-        const userOrders = result.orders.filter((order: any) => 
-          order.customerName === user?.fullName || 
-          order.phoneNumber === user?.phoneNumber
-        ).map((order: any) => ({
+        const userOrders = result.orders.filter((order: any) => {
+          const byName = order.customerName && user?.fullName && order.customerName.trim() === user.fullName.trim();
+          const byPhone = order.phoneNumber && user?.phoneNumber && order.phoneNumber.replace(/\D/g,'') === user.phoneNumber.replace(/\D/g,'');
+          const byReseller = order.resellerUserId && user?.id && order.resellerUserId === user.id; // طلبات أنشأها المستخدم كبائع
+          return Boolean(byName || byPhone || byReseller);
+        }).map((order: any) => ({
           ...order,
           unitPrice: Number(order.unitPrice),
           resellerPrice: order.resellerPrice ? Number(order.resellerPrice) : undefined,
           quantity: Number(order.quantity),
           shippingCost: Number(order.shippingCost),
           totalAmount: Number(order.totalAmount),
-          createdAt: order.createdAt ? order.createdAt.toISOString() : new Date().toISOString(),
+          createdAt: typeof order.createdAt === 'string' ? order.createdAt : new Date(order.createdAt).toISOString(),
         }));
         setOrders(userOrders);
       }
@@ -139,9 +141,13 @@ export default function UserOrdersScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header with back to home */}
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>طلباتي</Text>
+        <TouchableOpacity onPress={() => router.replace('/(tabs)')}> 
+          <Text style={{ color: '#FF6B35', fontWeight: '700' }}>الواجهة الرئيسية</Text>
+        </TouchableOpacity>
         <Text style={styles.orderCount}>
           {orders.length} طلب
         </Text>

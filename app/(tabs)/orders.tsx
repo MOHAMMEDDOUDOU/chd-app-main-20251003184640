@@ -87,8 +87,10 @@ export default function UserOrdersScreen() {
     switch (status) {
       case 'قيد المعالجة':
         return '#F59E0B';
-      case 'مؤكدة':
+      case 'مؤكد':
         return '#3B82F6';
+      case 'قيد الشحن':
+        return '#6366F1';
       case 'تم التسليم':
         return '#10B981';
       case 'ملغية':
@@ -102,8 +104,10 @@ export default function UserOrdersScreen() {
     switch (status) {
       case 'قيد المعالجة':
         return <Clock size={16} color="#F59E0B" />;
-      case 'مؤكدة':
+      case 'مؤكد':
         return <CheckCircle size={16} color="#3B82F6" />;
+      case 'قيد الشحن':
+        return <Clock size={16} color="#6366F1" />;
       case 'تم التسليم':
         return <CheckCircle size={16} color="#10B981" />;
       case 'ملغية':

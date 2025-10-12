@@ -16,7 +16,8 @@ export const orderStatusEnum = pgEnum('order_status', [
   'تم التأكيد',
   'قيد الشحن',
   'تم التسليم',
-  'ملغي'
+  'ملغي',
+  'نفد المخزون'
 ]);
 
 export const deliveryTypeEnum = pgEnum('delivery_type', ['home', 'stopDesk']);

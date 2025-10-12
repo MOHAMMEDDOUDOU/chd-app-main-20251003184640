@@ -48,7 +48,20 @@ export interface CreateOrderData {
 // تم إلغاء منطق إنشاء روابط الويب للطلبيات بناءً على طلب العميل
 
 export interface UpdateOrderData {
-  status?: 'pending' | 'confirmed' | 'cancelled';
+  // يدعم القيم الإنجليزية المعيارية وكذلك العربية المخزّنة في قاعدة البيانات
+  status?:
+    | 'pending'
+    | 'confirmed'
+    | 'cancelled'
+    | 'in_progress'
+    | 'delivered'
+    | 'out_of_stock'
+    | 'قيد المعالجة'
+    | 'تم التأكيد'
+    | 'قيد الشحن'
+    | 'تم التسليم'
+    | 'ملغي'
+    | 'نفد المخزون';
   resellerPrice?: number;
   trackingNumber?: string;
 }
@@ -367,13 +380,24 @@ export async function deleteOrder(id: string) {
 }
 
 // الحصول على الطلبات حسب الحالة
-export async function getOrdersByStatus(status: 'pending' | 'confirmed' | 'cancelled') {
+export async function getOrdersByStatus(
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'cancelled'
+    | 'in_progress'
+    | 'delivered'
+    | 'out_of_stock'
+) {
   try {
     // تحويل الحالة الإنجليزية إلى العربية
-    const statusMap = {
-      'pending': 'قيد المعالجة' as const,
-      'confirmed': 'تم التأكيد' as const, 
-      'cancelled': 'ملغي' as const
+  const statusMap = {
+      pending: 'قيد المعالجة' as const,
+      confirmed: 'تم التأكيد' as const,
+      cancelled: 'ملغي' as const,
+      in_progress: 'قيد الشحن' as const,
+      delivered: 'تم التسليم' as const,
+      out_of_stock: 'نفد المخزون' as const,
     };
     
     const arabicStatus = statusMap[status];

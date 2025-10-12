@@ -376,6 +376,12 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
         return '#3B82F6';
       case 'cancelled':
         return '#EF4444';
+      case 'in_progress':
+        return '#6366F1';
+      case 'delivered':
+        return '#10B981';
+      case 'out_of_stock':
+        return '#6B7280';
       default:
         return '#6B7280';
     }
@@ -393,6 +399,12 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
         return 'مؤكد';
       case 'cancelled':
         return 'ملغي';
+      case 'in_progress':
+        return 'قيد الشحن';
+      case 'delivered':
+        return 'تم التسليم';
+      case 'out_of_stock':
+        return 'نفد المخزون';
       default:
         return status || 'غير محدد';
     }
@@ -467,7 +479,30 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
               ملغي
             </Text>
           </TouchableOpacity>
-          
+          <TouchableOpacity
+            style={[styles.filterButton, statusFilter === 'in_progress' && styles.activeFilterButton]}
+            onPress={() => setStatusFilter('in_progress')}
+          >
+            <Text style={[styles.filterButtonText, statusFilter === 'in_progress' && styles.activeFilterButtonText]}>
+              قيد الشحن
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterButton, statusFilter === 'delivered' && styles.activeFilterButton]}
+            onPress={() => setStatusFilter('delivered')}
+          >
+            <Text style={[styles.filterButtonText, statusFilter === 'delivered' && styles.activeFilterButtonText]}>
+              تم التسليم
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterButton, statusFilter === 'out_of_stock' && styles.activeFilterButton]}
+            onPress={() => setStatusFilter('out_of_stock')}
+          >
+            <Text style={[styles.filterButtonText, statusFilter === 'out_of_stock' && styles.activeFilterButtonText]}>
+              نفد المخزون
+            </Text>
+          </TouchableOpacity>
 
         </ScrollView>
       </View>
@@ -859,6 +894,24 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                       <View style={styles.statusButtonsContainer}>
                         <Text style={styles.statusButtonsLabel}>تغيير الحالة:</Text>
                         <View style={styles.statusButtonsRow}>
+                          <TouchableOpacity
+                            style={[styles.statusButton, selectedOrderForDetails.status === 'in_progress' && styles.activeStatusButton]}
+                            onPress={() => handleStatusChange(selectedOrderForDetails.id, 'in_progress')}
+                          >
+                            <Text style={[styles.statusButtonText, selectedOrderForDetails.status === 'in_progress' && styles.activeStatusButtonText]}>قيد الشحن</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.statusButton, selectedOrderForDetails.status === 'delivered' && styles.activeStatusButton]}
+                            onPress={() => handleStatusChange(selectedOrderForDetails.id, 'delivered')}
+                          >
+                            <Text style={[styles.statusButtonText, selectedOrderForDetails.status === 'delivered' && styles.activeStatusButtonText]}>تم التسليم</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.statusButton, selectedOrderForDetails.status === 'out_of_stock' && styles.activeStatusButton]}
+                            onPress={() => handleStatusChange(selectedOrderForDetails.id, 'out_of_stock')}
+                          >
+                            <Text style={[styles.statusButtonText, selectedOrderForDetails.status === 'out_of_stock' && styles.activeStatusButtonText]}>نفد المخزون</Text>
+                          </TouchableOpacity>
                           <TouchableOpacity
                             style={[
                               styles.statusButton,

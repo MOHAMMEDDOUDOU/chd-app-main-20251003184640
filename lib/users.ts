@@ -186,3 +186,23 @@ export async function deleteUserAccount(userId: string) {
     }
   }
 }
+
+// جلب جميع المستخدمين (لا تُرجع كلمات سر)
+export async function listUsers() {
+  try {
+    const rows = await db.select({
+      id: users.id,
+      username: users.username,
+      fullName: users.fullName,
+      phoneNumber: users.phoneNumber,
+      role: users.role,
+      isActive: users.isActive,
+      createdAt: users.createdAt,
+      profileImageUrl: users.profileImageUrl,
+    }).from(users);
+    return { success: true, users: rows };
+  } catch (error) {
+    console.error('Error listing users:', error);
+    return { success: false, error: 'فشل في جلب المستخدمين' };
+  }
+}

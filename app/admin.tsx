@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Package, Tag, ShoppingBag, LogOut, FolderOpen } from 'lucide-react-native';
+import { Package, Tag, ShoppingBag, LogOut, FolderOpen, Users } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../lib/userContext';
 import { useAdmin } from '../lib/adminContext';
@@ -18,6 +18,7 @@ import OffersManagement from '../components/OffersManagement';
 import OrdersManagement from '../components/OrdersManagement';
 import CategoriesManagement from '../components/CategoriesManagement';
 import ChatsManagement from '../components/ChatsManagement';
+import UsersManagement from '../components/UsersManagement';
 import SellersManagement from '../components/SellersManagement';
 
 export default function AdminScreen() {
@@ -71,6 +72,8 @@ export default function AdminScreen() {
         return <CategoriesManagement onClose={() => setCurrentSection('products')} />;
       case 'chats':
         return <ChatsManagement onClose={() => setCurrentSection('products')} />;
+      case 'users':
+        return <UsersManagement onClose={() => setCurrentSection('products')} />;
       case 'sellers':
         return <SellersManagement onClose={() => setCurrentSection('products')} />;
       default:
@@ -143,12 +146,12 @@ export default function AdminScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.tab, currentSection === 'chats' && styles.activeTab]}
-            onPress={() => setCurrentSection('chats')}
+            style={[styles.tab, currentSection === 'users' && styles.activeTab]}
+            onPress={() => setCurrentSection('users')}
           >
-            <Ionicons name="chatbubbles-outline" size={20} color={currentSection === 'chats' ? '#FF6B35' : '#666'} />
-            <Text style={[styles.tabText, currentSection === 'chats' && styles.activeTabText]}>
-              المحادثات
+            <Users size={20} color={currentSection === 'users' ? '#FF6B35' : '#666'} />
+            <Text style={[styles.tabText, currentSection === 'users' && styles.activeTabText]}>
+              المستخدمون
             </Text>
           </TouchableOpacity>
         </View>

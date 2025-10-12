@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Filter, Star, ShoppingCart, Bell, Menu, User } from 'lucide-react-native';
+import { Search, Filter, Star, ShoppingCart, Bell, Menu, User, ShoppingBag } from 'lucide-react-native';
 import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -686,6 +686,19 @@ export default function HomeScreen() {
                   <Text style={styles.notificationCount}>{unreadCount}</Text>
                 </View>
               )}
+            </TouchableOpacity>
+
+            {/* Orders Shortcut */}
+            <TouchableOpacity 
+              style={styles.chatButton}
+              onPress={() => {
+                if (user) router.push('/(tabs)/orders'); else {
+                  Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول لعرض طلباتك');
+                  router.push('/login');
+                }
+              }}
+            >
+              <ShoppingBag size={22} color="#1F2937" />
             </TouchableOpacity>
             
             <TouchableOpacity 

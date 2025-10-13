@@ -140,10 +140,17 @@ export default function UserOrdersScreen() {
   };
 
   const computeProfit = (o: any) => {
-    const baseOriginal = (o.originalItem?.price != null) ? Number(o.originalItem.price) : Number(o.unitPrice);
+    // السعر الأصلي الفعلي: يستخدم سعر التخفيض إن وجد وكان أقل من السعر الأصلي
+    const origPrice = o.originalItem?.price != null ? Number(o.originalItem.price) : undefined;
+    const discount = o.originalItem?.discountPrice != null ? Number(o.originalItem.discountPrice) : undefined;
+    const effectiveOriginal = (discount != null && discount > 0 && origPrice != null && discount < origPrice)
+      ? discount
+      : (origPrice != null ? origPrice : Number(o.unitPrice));
+
+    // سعر إعادة البيع: إن وُجد resellerPrice نستخدمه، وإلا نستخدم unitPrice
     const resell = (o.resellerPrice != null) ? Number(o.resellerPrice) : Number(o.unitPrice);
     const qty = Number(o.quantity || 1);
-    const profitPerUnit = Math.max(0, resell - baseOriginal);
+    const profitPerUnit = Math.max(0, resell - Number(effectiveOriginal));
     return profitPerUnit * qty;
   };
 

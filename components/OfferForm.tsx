@@ -216,7 +216,7 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
         name: formData.name.trim(),
         description: formData.description.trim(),
         price: Number(formData.price),
-        discount_price: formData.discount_price ? Number(formData.discount_price) : undefined,
+        discount_price: formData.discount_price && formData.discount_price.trim() !== '' ? Number(formData.discount_price) : null,
         discount_percentage,
         stock_quantity: Number(formData.stock_quantity),
         category: 'عروض', // قيمة افتراضية للفئة

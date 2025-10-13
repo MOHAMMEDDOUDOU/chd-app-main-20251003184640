@@ -152,6 +152,9 @@ export default function UserOrdersScreen() {
     setShowDetailsModal(true);
   };
 
+  // مجموع الفائدة لكل الطلبيات
+  const totalProfit = orders.reduce((sum, o) => sum + computeProfit(o as any), 0);
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -174,7 +177,7 @@ export default function UserOrdersScreen() {
         <Text style={styles.orderCount}>{orders.length} طلب</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {orders.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Package size={64} color="#9CA3AF" />
@@ -347,6 +350,21 @@ export default function UserOrdersScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Profit Footer with WhatsApp button */}
+      <View style={styles.profitFooter}>
+        <Text style={styles.profitFooterText}>مجموع الفائدة: {totalProfit.toLocaleString()} دج</Text>
+        <TouchableOpacity
+          style={styles.profitButton}
+          onPress={() => {
+            const msg = `مرحباً، أود طلب مجموع الفائدة لطلباتي: ${totalProfit.toLocaleString()} دج`;
+            requestProfitWhatsApp(msg);
+          }}
+        >
+          <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
+          <Text style={styles.profitButtonText}>اطلب الفائدة</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -464,6 +482,21 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
+  },
+  profitFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  profitFooterText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#10B981',
   },
   emptyContainer: {
     flex: 1,

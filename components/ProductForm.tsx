@@ -420,17 +420,29 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
 
             {/* حقل سعر التخفيض */}
             {showDiscountPrice && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>سعر التخفيض (دج)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.discount_price}
-                  onChangeText={(value) => handleInputChange('discount_price', value)}
-                  placeholder="أدخل سعر التخفيض"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="numeric"
-                />
-              </View>
+              <>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>سعر التخفيض (دج)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={formData.discount_price}
+                    onChangeText={(value) => handleInputChange('discount_price', value)}
+                    placeholder="أدخل سعر التخفيض"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                  />
+                </View>
+                <TouchableOpacity
+                  style={styles.removeFieldButton}
+                  onPress={() => {
+                    setShowDiscountPrice(false);
+                    setFormData(prev => ({ ...prev, discount_price: '' }));
+                  }}
+                >
+                  <X size={18} color="#EF4444" />
+                  <Text style={styles.removeFieldButtonText}>إخفاء/إزالة سعر التخفيض</Text>
+                </TouchableOpacity>
+              </>
             )}
 
             {/* حقل الوصف */}
@@ -919,5 +931,25 @@ const styles = StyleSheet.create({
     color: '#FF6B35',
     fontWeight: '600',
     marginLeft: 8,
+  },
+  removeFieldButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 4,
+    marginBottom: 12,
+    gap: 6,
+  },
+  removeFieldButtonText: {
+    fontSize: 14,
+    color: '#EF4444',
+    fontWeight: '600',
+    marginLeft: 6,
   },
 });

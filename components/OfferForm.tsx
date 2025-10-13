@@ -364,17 +364,29 @@ export default function OfferForm({ visible, onClose, onSuccess, offer }: OfferF
             )}
 
             {showDiscountPrice && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>سعر التخفيض (دج)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={formData.discount_price}
-                  onChangeText={(value) => handleInputChange('discount_price', value)}
-                  placeholder="اختياري"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="numeric"
-                />
-              </View>
+              <>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>سعر التخفيض (دج)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={formData.discount_price}
+                    onChangeText={(value) => handleInputChange('discount_price', value)}
+                    placeholder="اختياري"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                  />
+                </View>
+                <TouchableOpacity
+                  style={styles.optionalRemoveButton}
+                  onPress={() => {
+                    setShowDiscountPrice(false);
+                    setFormData(prev => ({ ...prev, discount_price: '' }));
+                  }}
+                >
+                  <X size={18} color="#EF4444" />
+                  <Text style={styles.optionalRemoveText}>إخفاء/إزالة سعر الخصم</Text>
+                </TouchableOpacity>
+              </>
             )}
 
             {/* قسم الصور */}
@@ -562,6 +574,23 @@ const styles = StyleSheet.create({
     color: '#FF6B35',
     fontWeight: '600',
     marginLeft: 8,
+  },
+  optionalRemoveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    borderRadius: 8,
+    paddingVertical: 10,
+    marginBottom: 12,
+    gap: 6,
+  },
+  optionalRemoveText: {
+    fontSize: 14,
+    color: '#EF4444',
+    fontWeight: '600',
   },
   // أنماط الصور
   imagesGrid: {

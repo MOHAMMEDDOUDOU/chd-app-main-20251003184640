@@ -99,7 +99,7 @@ export default function UsersManagement(_: Props) {
               </View>
             </View>
 
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 80 }} showsVerticalScrollIndicator={false}>
               {userOrders.length === 0 ? (
                 <View style={styles.center}><Text style={styles.muted}>لا توجد طلبيات</Text></View>
               ) : (
@@ -127,6 +127,23 @@ export default function UsersManagement(_: Props) {
                 })
               )}
             </ScrollView>
+            {/* User total profit footer */}
+            <View style={styles.userProfitFooter}>
+              <Text style={styles.userProfitFooterText}>
+                إجمالي الفائدة: {
+                  (() => {
+                    const total = userOrders.reduce((sum, o: any) => {
+                      const baseOriginal = (o.originalItem?.price != null) ? Number(o.originalItem.price) : Number(o.unitPrice);
+                      const resell = Number(o.resellerPrice || o.unitPrice);
+                      const qty = Number(o.quantity || 1);
+                      const profitPerUnit = Math.max(0, resell - baseOriginal);
+                      return sum + profitPerUnit * qty;
+                    }, 0);
+                    return `${total.toLocaleString()} دج`;
+                  })()
+                }
+              </Text>
+            </View>
           </View>
         </View>
       )}
@@ -162,4 +179,21 @@ const styles = StyleSheet.create({
   orderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   orderLabel: { fontSize: 12, color: '#6B7280' },
   orderValue: { fontSize: 14, color: '#1F2937', fontWeight: '600' },
+  userProfitFooter: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  userProfitFooterText: {
+    color: '#10B981',
+    fontWeight: '700',
+    fontSize: 14,
+    textAlign: 'left',
+  },
 });

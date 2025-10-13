@@ -81,13 +81,22 @@ export default function UsersManagement(_: Props) {
           ))
         )}
       </ScrollView>
-      {/* User Orders Modal */}
+      {/* User Orders Modal - Styled like OrdersManagement details */}
       {showOrdersModal && (
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>طلبيات {selectedUser?.fullName || selectedUser?.username}</Text>
-              <TouchableOpacity onPress={() => setShowOrdersModal(false)}><Text style={{ color: '#EF4444', fontWeight: '700' }}>إغلاق</Text></TouchableOpacity>
+          <View style={styles.detailsModalContainer}>
+            <View style={styles.detailsModalHeader}>
+              <View style={styles.headerGradient}>
+                <View style={styles.headerContentLikeOrders}>
+                  <View>
+                    <Text style={styles.detailsModalTitle}>تفاصيل طلبيات المستخدم</Text>
+                    <Text style={styles.orderIdText}>{selectedUser?.fullName || selectedUser?.username}</Text>
+                  </View>
+                  <TouchableOpacity style={styles.closeButtonLikeOrders} onPress={() => setShowOrdersModal(false)}>
+                    <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>إغلاق</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
 
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
@@ -95,22 +104,23 @@ export default function UsersManagement(_: Props) {
                 <View style={styles.center}><Text style={styles.muted}>لا توجد طلبيات</Text></View>
               ) : (
                 userOrders.map((o) => {
-                  // السعر الأصلي الصحيح من العنصر الأصلي (product/offer) إن وُجد
                   const baseOriginal = (o.originalItem?.price != null) ? Number(o.originalItem.price) : Number(o.unitPrice);
                   const resell = Number(o.resellerPrice || o.unitPrice);
                   const qty = Number(o.quantity || 1);
                   const profitPerUnit = Math.max(0, resell - baseOriginal);
                   const totalProfit = profitPerUnit * qty;
                   return (
-                    <View key={o.id} style={styles.orderCard}>
-                      <View style={styles.orderRow}><Text style={styles.orderLabel}>المنتج/العرض:</Text><Text style={styles.orderValue}>{o.itemName}</Text></View>
-                      <View style={styles.orderRow}><Text style={styles.orderLabel}>الكمية:</Text><Text style={styles.orderValue}>{qty}</Text></View>
-                      <View style={styles.orderRow}><Text style={styles.orderLabel}>السعر الأصلي:</Text><Text style={styles.orderValue}>{baseOriginal.toLocaleString()} دج</Text></View>
-                      <View style={styles.orderRow}><Text style={styles.orderLabel}>سعر إعادة البيع:</Text><Text style={styles.orderValue}>{resell.toLocaleString()} دج</Text></View>
-                      <View style={styles.orderRow}><Text style={styles.orderLabel}>الحالة:</Text><Text style={styles.orderValue}>{o.status}</Text></View>
-                      <View style={[styles.orderRow, { borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 8 }]}>
-                        <Text style={[styles.orderLabel, { fontWeight: '700' }]}>فائدة هذه الطلبية:</Text>
-                        <Text style={[styles.orderValue, { color: '#10B981', fontWeight: '700' }]}>{totalProfit.toLocaleString()} دج</Text>
+                    <View key={o.id} style={styles.sectionCard}>
+                      <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>طلبية في {o.itemName}</Text></View>
+                      <View style={styles.sectionContent}>
+                        <View style={styles.orderRow}><Text style={styles.orderLabel}>الكمية</Text><Text style={styles.orderValue}>{qty}</Text></View>
+                        <View style={styles.orderRow}><Text style={styles.orderLabel}>السعر الأصلي</Text><Text style={styles.orderValue}>{baseOriginal.toLocaleString()} دج</Text></View>
+                        <View style={styles.orderRow}><Text style={styles.orderLabel}>سعر إعادة البيع</Text><Text style={styles.orderValue}>{resell.toLocaleString()} دج</Text></View>
+                        <View style={styles.orderRow}><Text style={styles.orderLabel}>الحالة</Text><Text style={styles.orderValue}>{o.status}</Text></View>
+                        <View style={[styles.orderRow, { borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 8 }]}>
+                          <Text style={[styles.orderLabel, { fontWeight: '700' }]}>فائدة هذه الطلبية</Text>
+                          <Text style={[styles.orderValue, { color: '#10B981', fontWeight: '700' }]}>{totalProfit.toLocaleString()} دج</Text>
+                        </View>
                       </View>
                     </View>
                   );
@@ -140,9 +150,14 @@ const styles = StyleSheet.create({
   details: { backgroundColor: '#FF6B35', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
   detailsText: { color: '#FFFFFF', fontWeight: '700' },
   modalOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { width: '92%', height: '80%', backgroundColor: '#FFFFFF', borderRadius: 16, overflow: 'hidden' },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
-  modalTitle: { fontSize: 16, fontWeight: '700', color: '#1F2937' },
+  // match OrdersManagement modal styles (simplified)
+  detailsModalContainer: { width: '96%', height: '90%', backgroundColor: '#FFFFFF', borderRadius: 20, overflow: 'hidden' },
+  detailsModalHeader: { backgroundColor: '#FF6B35' },
+  headerGradient: { backgroundColor: '#FF6B35', paddingTop: 16, paddingBottom: 16, paddingHorizontal: 16 },
+  headerContentLikeOrders: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  detailsModalTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFFFFF' },
+  orderIdText: { fontSize: 12, color: '#FFFFFF', opacity: 0.9 },
+  closeButtonLikeOrders: { paddingHorizontal: 12, paddingVertical: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
   orderCard: { backgroundColor: '#FFFFFF', borderRadius: 12, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: '#E5E7EB' },
   orderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   orderLabel: { fontSize: 12, color: '#6B7280' },

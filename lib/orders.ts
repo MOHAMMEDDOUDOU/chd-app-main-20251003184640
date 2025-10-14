@@ -1,6 +1,6 @@
 import { db } from './database/config';
 import { orders, products, offers, users, sellers } from './database/config';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { NotificationService } from './notifications';
 
 export interface Order {
@@ -77,10 +77,38 @@ export async function getOrders() {
         orderBy: (orders, { desc }) => [desc(orders.createdAt)]
       });
     } catch (e) {
-      // Fallback for databases without is_archived column yet
-      result = await db.query.orders.findMany({
-        orderBy: (orders, { desc }) => [desc(orders.createdAt)]
-      });
+      // Fallback for databases without is_archived column yet: use raw SELECT without is_archived
+      const raw = await (db as any).execute(sql`
+        SELECT 
+          id,
+          item_type      AS "itemType",
+          item_id        AS "itemId",
+          item_name      AS "itemName",
+          quantity,
+          unit_price     AS "unitPrice",
+          subtotal,
+          shipping_cost  AS "shippingCost",
+          total_amount   AS "totalAmount",
+          customer_name  AS "customerName",
+          phone_number   AS "phoneNumber",
+          wilaya,
+          commune,
+          delivery_type  AS "deliveryType",
+          status,
+          reseller_price AS "resellerPrice",
+          order_link     AS "orderLink",
+          seller_id      AS "sellerId",
+          seller_name    AS "sellerName",
+          reseller_phone AS "resellerPhone",
+          reseller_user_id AS "resellerUserId",
+          tracking_number AS "trackingNumber",
+          image_url      AS "imageUrl",
+          created_at     AS "createdAt"
+        FROM orders
+        ORDER BY created_at DESC
+      `);
+      // @ts-ignore
+      result = raw?.rows ?? [];
     }
     
 

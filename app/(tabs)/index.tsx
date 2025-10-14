@@ -947,8 +947,12 @@ export default function HomeScreen() {
                   ))}
                 </ScrollView>
               </View>
-              
-              
+              {/* Pagination Dots */}
+              <View style={styles.carouselDots}>
+                {offers.map((_, i) => (
+                  <View key={i} style={[styles.carouselDot, i === offerIndex && styles.carouselDotActive]} />
+                ))}
+              </View>
             </View>
           </View>
         )}
@@ -1321,6 +1325,22 @@ const styles = StyleSheet.create({
   carouselOfferImage: {
     width: '100%',
     height: 200,
+  },
+  carouselDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  carouselDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E5E7EB',
+  },
+  carouselDotActive: {
+    backgroundColor: '#FF6B35',
   },
   
   heroOfferContent: {

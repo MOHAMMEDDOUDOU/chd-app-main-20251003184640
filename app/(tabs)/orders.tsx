@@ -154,13 +154,19 @@ export default function UserOrdersScreen() {
     return profitPerUnit * qty;
   };
 
+  const isDelivered = (status: string | undefined | null) => {
+    if (!status) return false;
+    const s = String(status).trim().toLowerCase();
+    return s === 'تم التسليم' || s === 'delivered';
+  };
+
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
   };
 
   // مجموع الفائدة لكل الطلبيات
-  const totalProfit = orders.reduce((sum, o) => sum + computeProfit(o as any), 0);
+  const totalProfit = orders.reduce((sum, o) => sum + (isDelivered((o as any).status) ? computeProfit(o as any) : 0), 0);
 
   if (loading) {
     return (
@@ -231,13 +237,15 @@ export default function UserOrdersScreen() {
                   الكمية: {order.quantity}
                 </Text>
               </View>
-              <View style={styles.profitRow}>
-                <Text style={styles.profitText}>الفائدة: {profit.toLocaleString()} دج</Text>
-                <TouchableOpacity style={styles.profitButton} onPress={() => requestProfitWhatsApp(profitMessage)}>
-                  <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
-                  <Text style={styles.profitButtonText}>اطلب الفائدة</Text>
-                </TouchableOpacity>
-              </View>
+              {isDelivered(order.status) && (
+                <View style={styles.profitRow}>
+                  <Text style={styles.profitText}>الفائدة: {profit.toLocaleString()} دج</Text>
+                  <TouchableOpacity style={styles.profitButton} onPress={() => requestProfitWhatsApp(profitMessage)}>
+                    <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
+                    <Text style={styles.profitButtonText}>اطلب الفائدة</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </TouchableOpacity>
             );
           })
@@ -308,29 +316,33 @@ export default function UserOrdersScreen() {
                       {formatPrice(selectedOrder.totalAmount)}
                     </Text>
                   </View>
-                  {/* Profit in details */}
-                  <View style={[styles.detailRow, { marginTop: 8 }]}>
-                    <Text style={styles.detailLabel}>الفائدة:</Text>
-                    <Text style={[styles.detailValue, { color: '#10B981', fontWeight: '700' }]}>
-                      {(() => {
-                        const p = computeProfit(selectedOrder);
-                        return `${p.toLocaleString()} دج`;
-                      })()}
-                    </Text>
-                  </View>
-                  <View style={[styles.detailRow, { justifyContent: 'flex-end' }]}>
-                    <TouchableOpacity
-                      style={styles.profitButton}
-                      onPress={() => {
-                        const p = computeProfit(selectedOrder);
-                        const msg = `مرحباً، أود طلب فائدة طلبية: ${selectedOrder.itemName} بقيمة ${p.toLocaleString()} دج`;
-                        requestProfitWhatsApp(msg);
-                      }}
-                    >
-                      <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
-                      <Text style={styles.profitButtonText}>اطلب الفائدة</Text>
-                    </TouchableOpacity>
-                  </View>
+                  {/* Profit in details (only when delivered) */}
+                  {isDelivered(selectedOrder.status) && (
+                    <>
+                      <View style={[styles.detailRow, { marginTop: 8 }]}>
+                        <Text style={styles.detailLabel}>الفائدة:</Text>
+                        <Text style={[styles.detailValue, { color: '#10B981', fontWeight: '700' }]}>
+                          {(() => {
+                            const p = computeProfit(selectedOrder);
+                            return `${p.toLocaleString()} دج`;
+                          })()}
+                        </Text>
+                      </View>
+                      <View style={[styles.detailRow, { justifyContent: 'flex-end' }]}>
+                        <TouchableOpacity
+                          style={styles.profitButton}
+                          onPress={() => {
+                            const p = computeProfit(selectedOrder);
+                            const msg = `مرحباً، أود طلب فائدة طلبية: ${selectedOrder.itemName} بقيمة ${p.toLocaleString()} دج`;
+                            requestProfitWhatsApp(msg);
+                          }}
+                        >
+                          <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
+                          <Text style={styles.profitButtonText}>اطلب الفائدة</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
                 </View>
 
                 <View style={styles.detailSection}>

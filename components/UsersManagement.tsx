@@ -84,7 +84,7 @@ export default function UsersManagement(_: Props) {
       {/* User Orders Modal - Styled like OrdersManagement details */}
       {showOrdersModal && (
         <View style={styles.modalOverlay}>
-          <View style={styles.detailsModalContainer}>
+          <View style={[styles.detailsModalContainer, { height: Math.min(600, 140 + Math.max(1, userOrders.length) * 130) }]}>
             <View style={styles.detailsModalHeader}>
               <View style={styles.headerGradient}>
                 <View style={styles.headerContentLikeOrders}>

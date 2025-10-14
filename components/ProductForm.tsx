@@ -271,7 +271,9 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         description: formData.description.trim() || undefined,
         price: Number(formData.price),
         discount_price: formData.discount_price && formData.discount_price.trim() !== '' ? Number(formData.discount_price) : null,
-        discount_percentage: discount_percentage,
+        discount_percentage: (formData.discount_price && formData.discount_price.trim() !== '' && Number(formData.discount_price) > 0)
+          ? discount_percentage
+          : null,
         stock_quantity: Number(formData.stock_quantity),
         category: formData.category.trim(),
         image_url: formData.image_url.trim() || undefined,

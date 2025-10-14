@@ -1116,11 +1116,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+    maxWidth: '100%',
   },
   statusText: {
     fontSize: 12,
     fontWeight: '600',
     flexWrap: 'wrap',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   // Prevent per-character wrapping: keep words intact, allow word-level wrap
   // For react-native Text, we avoid adding extra styles that force char wrapping

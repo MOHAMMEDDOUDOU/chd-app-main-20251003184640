@@ -70,10 +70,18 @@ export interface UpdateOrderData {
 // الحصول على جميع الطلبات مع معلومات البائع والمشتري والمنتج/العرض الأصلي
 export async function getOrders() {
   try {
-    const result = await db.query.orders.findMany({
-      where: eq(orders.isArchived, false as any),
-      orderBy: (orders, { desc }) => [desc(orders.createdAt)]
-    });
+    let result;
+    try {
+      result = await db.query.orders.findMany({
+        where: eq((orders as any).isArchived, false as any),
+        orderBy: (orders, { desc }) => [desc(orders.createdAt)]
+      });
+    } catch (e) {
+      // Fallback for databases without is_archived column yet
+      result = await db.query.orders.findMany({
+        orderBy: (orders, { desc }) => [desc(orders.createdAt)]
+      });
+    }
     
 
     
@@ -248,10 +256,16 @@ export async function getOrders() {
 
 export async function getArchivedOrders() {
   try {
-    const rows = await db.query.orders.findMany({
-      where: eq(orders.isArchived, true as any),
-      orderBy: (orders, { desc }) => [desc(orders.createdAt)]
-    });
+    let rows;
+    try {
+      rows = await db.query.orders.findMany({
+        where: eq((orders as any).isArchived, true as any),
+        orderBy: (orders, { desc }) => [desc(orders.createdAt)]
+      });
+    } catch (e) {
+      // Column not available yet; return empty archived set
+      rows = [] as any[];
+    }
     return { success: true, orders: rows };
   } catch (error) {
     console.error('Error fetching archived orders:', error);

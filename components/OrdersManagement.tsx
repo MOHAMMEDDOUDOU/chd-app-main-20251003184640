@@ -535,11 +535,13 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
 
                 {/* Status Badge */}
                 <View style={styles.statusSection}>
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
-                    <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
-                      {order.status}
-                    </Text>
-                  </View>
+                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
+                      <View style={styles.statusWords}>
+                        {String(order.status).split(' ').map((word, idx) => (
+                          <Text key={idx} style={[styles.statusText, { color: getStatusColor(order.status) }, styles.statusWord]}>{word}</Text>
+                        ))}
+                      </View>
+                    </View>
                 </View>
 
                 {/* Actions */}
@@ -884,9 +886,11 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                         <View style={styles.detailTextContainer}>
                           <Text style={styles.detailLabel}>الحالة الحالية</Text>
                           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedOrderForDetails.status) + '20' }]}>
-                            <Text style={[styles.statusText, { color: getStatusColor(selectedOrderForDetails.status) }]}>
-                              {getStatusText(selectedOrderForDetails.status)}
-                            </Text>
+                            <View style={styles.statusWords}>
+                              {getStatusText(selectedOrderForDetails.status).split(' ').map((word, idx) => (
+                                <Text key={idx} style={[styles.statusText, { color: getStatusColor(selectedOrderForDetails.status) }, styles.statusWord]}>{word}</Text>
+                              ))}
+                            </View>
                           </View>
                         </View>
                       </View>
@@ -1124,6 +1128,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     includeFontPadding: false,
     textAlignVertical: 'center',
+  },
+  statusWords: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  statusWord: {
+    // Keep each word intact
   },
   // Prevent per-character wrapping: keep words intact, allow word-level wrap
   // For react-native Text, we avoid adding extra styles that force char wrapping

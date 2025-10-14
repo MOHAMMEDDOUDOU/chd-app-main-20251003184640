@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   sub: { fontSize: 12, color: '#6B7280', marginTop: 2 },
   details: { backgroundColor: '#FF6B35', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
   detailsText: { color: '#FFFFFF', fontWeight: '700' },
-  modalOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-start', alignItems: 'center', paddingTop: 30 },
   // match OrdersManagement modal styles (simplified)
   detailsModalContainer: { width: '96%', maxHeight: '90%', backgroundColor: '#FFFFFF', borderRadius: 20, overflow: 'hidden' },
   detailsModalHeader: { backgroundColor: '#FF6B35' },

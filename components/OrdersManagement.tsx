@@ -971,7 +971,6 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                             </Text>
                           </TouchableOpacity>
                           
-
                           )}
                         </View>
                       </View>

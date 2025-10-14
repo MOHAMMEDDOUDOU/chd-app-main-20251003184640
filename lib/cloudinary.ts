@@ -19,12 +19,20 @@ export class CloudinaryService {
       // إنشاء FormData
       const formData = new FormData();
       
-      // معالجة الصورة بشكل مختلف حسب النوع
+      // معالجة الصورة: دعم روابط الشبكة والملفات المحلية (file:/content:)
       if (typeof imageUri === 'string') {
-        // إذا كان string، نحتاج لتحويله إلى blob
-        const response = await fetch(imageUri);
-        const blob = await response.blob();
-        formData.append('file', blob, 'image.jpg');
+        if (imageUri.startsWith('file:') || imageUri.startsWith('content:')) {
+          formData.append('file', {
+            uri: imageUri,
+            type: 'image/jpeg',
+            name: 'image.jpg'
+          } as any);
+        } else {
+          // رابط شبكة (http/https)
+          const response = await fetch(imageUri);
+          const blob = await response.blob();
+          formData.append('file', blob, 'image.jpg');
+        }
       } else {
         // إذا كان object، استخدم الطريقة العادية
         formData.append('file', {

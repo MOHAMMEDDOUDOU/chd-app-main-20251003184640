@@ -202,7 +202,13 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
               const result = await deleteOrder(order.id);
               if (result.success) {
                 Alert.alert('✅ نجح', 'تم حذف الطلب بنجاح');
-                loadOrders();
+                // حدّث القائمة محلياً لإظهار النتيجة فوراً
+                setOrders(prev => prev.filter(o => o.id !== order.id));
+                // إغلاق نافذة التفاصيل إن كانت تعرض هذه الطلبية
+                if (selectedOrderForDetails && selectedOrderForDetails.id === order.id) {
+                  setShowDetailsModal(false);
+                  setSelectedOrderForDetails(null);
+                }
               } else {
                 Alert.alert('خطأ', result.error || 'فشل في حذف الطلب');
               }
@@ -499,14 +505,23 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                   </View>
                 </View>
 
-                {/* Show Details Button */}
-                <TouchableOpacity
-                  style={styles.detailsButton}
-                  onPress={() => handleViewOrder(order)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.detailsButtonText}>عرض التفاصيل</Text>
-                </TouchableOpacity>
+                {/* Actions */}
+                <View style={styles.actionsRow}>
+                  <TouchableOpacity
+                    style={styles.detailsButton}
+                    onPress={() => handleViewOrder(order)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.detailsButtonText}>عرض التفاصيل</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteOrder(order)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.deleteButtonText}>حذف</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           ))
@@ -1062,6 +1077,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  deleteButton: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   // Enhanced Modal Styles
   modalOverlay: {
     flex: 1,
@@ -1072,8 +1103,8 @@ const styles = StyleSheet.create({
   detailsModalContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    width: '95%',
-    maxHeight: '90%',
+    width: '98%',
+    height: '92%',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

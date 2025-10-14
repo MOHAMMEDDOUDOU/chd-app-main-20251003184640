@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Filter, Star, ShoppingCart, Bell, Menu, User } from 'lucide-react-native';
+import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -1018,6 +1019,23 @@ export default function HomeScreen() {
           </View>
         </View>
       )}
+      {/* WhatsApp Floating Button */}
+      <TouchableOpacity
+        style={styles.whatsappFab}
+        activeOpacity={0.8}
+        onPress={() => {
+          const phone = '+213562163035';
+          const url = `whatsapp://send?phone=${phone}`;
+          Linking.openURL(url).catch(() => {
+            Alert.alert('خطأ', 'تعذر فتح واتساب');
+          });
+        }}
+      >
+        <Image
+          source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg' }}
+          style={{ width: 28, height: 28, tintColor: '#FFFFFF' }}
+        />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -1672,5 +1690,21 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     color: '#6B7280',
+  },
+  whatsappFab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#25D366',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });

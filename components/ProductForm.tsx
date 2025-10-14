@@ -12,6 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { X, Save, Image as ImageIcon, Plus, Trash2 } from 'lucide-react-native';
+import * as DocumentPicker from 'expo-document-picker';
 import { createProduct, updateProduct, Product } from '../lib/products';
 import { CloudinaryService } from '../lib/cloudinary';
 import { CategoryService, Category } from '../lib/categories';
@@ -65,25 +66,37 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
     loadSellers();
   }, []);
 
-  // تحميل بيانات المنتج للتعديل
+  // تحميل بيانات المنتج للتعديل (دعم snake_case وcamelCase)
   useEffect(() => {
-    if (product) {
-      setFormData({
-        name: product.name || '',
-        description: product.description || '',
-        price: product.price?.toString() || '',
-        discount_price: product.discount_price?.toString() || '',
-        stock_quantity: product.stock_quantity?.toString() || '',
-        category: product.category || '',
-        image_url: product.image_url || '',
-      });
-      // تحميل الصور المتعددة إذا كانت موجودة
-      if (product.image_url) {
-        setImages([product.image_url]);
+    if (product && visible) {
+      const p: any = product as any;
+      const imageUrl = p.image_url || p.imageUrl || '';
+      const priceVal = p.price !== undefined && p.price !== null ? String(p.price) : '';
+      const discountPriceVal = p.discount_price ?? p.discountPrice;
+      const stockQtyVal = p.stock_quantity ?? p.stockQuantity;
+      const categoryVal = p.category || '';
+      const imgs: string[] | undefined = p.images;
+
+      setFormData(prev => ({
+        ...prev,
+        name: p.name || '',
+        description: p.description || '',
+        price: priceVal,
+        discount_price: discountPriceVal !== undefined && discountPriceVal !== null ? String(discountPriceVal) : '',
+        stock_quantity: stockQtyVal !== undefined && stockQtyVal !== null ? String(stockQtyVal) : '',
+        category: categoryVal,
+        image_url: imageUrl,
+      }));
+
+      if (Array.isArray(imgs) && imgs.length > 0) {
+        setImages(imgs);
+      } else if (imageUrl) {
+        setImages([imageUrl]);
       } else {
         setImages([]);
       }
-    } else {
+    }
+    if (!product && visible) {
       // إعادة تعيين النموذج للمنتج الجديد
       setFormData({
         name: '',
@@ -97,6 +110,16 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
       setImages([]);
     }
   }, [product, visible]);
+
+  // ضبط البائع (seller_id, seller_name) عند فتح نافذة التعديل بعد تحميل قائمة البائعين
+  useEffect(() => {
+    if (!product || !visible) return;
+    const p: any = product as any;
+    const sid: string | undefined = p.seller_id || p.sellerId;
+    if (!sid) return;
+    const seller = sellers.find(s => s.id === sid);
+    setFormData(prev => ({ ...(prev as any), seller_id: sid, seller_name: seller?.name || (prev as any).seller_name } as any));
+  }, [product, visible, sellers]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -112,13 +135,22 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
 
 
 
-  // رفع الصورة إلى Cloudinary - نسخة بسيطة
-  const uploadImage = async (imageUri: string) => {
+  // اختيار ملف من الجهاز ثم رفعه إلى Cloudinary
+  const pickAndUploadImage = async () => {
     try {
       setUploadingImage(true);
-      
+      // اختيار ملف صورة
+      const result = await DocumentPicker.getDocumentAsync({ type: 'image/*', multiple: false });
+      if (result.canceled) {
+        return;
+      }
+      const asset = result.assets?.[0];
+      if (!asset?.uri) {
+        Alert.alert('خطأ', 'تعذر الحصول على ملف الصورة');
+        return;
+      }
       console.log('🚀 بدء رفع الصورة...');
-      const imageUrl = await CloudinaryService.uploadImage(imageUri, 'products');
+      const imageUrl = await CloudinaryService.uploadImage(asset.uri, 'products');
       
       // إضافة الصورة إلى قائمة الصور
       setImages(prev => [...prev, imageUrl]);
@@ -228,6 +260,7 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
         stock_quantity: Number(formData.stock_quantity),
         category: formData.category.trim(),
         image_url: formData.image_url.trim() || undefined,
+        images: images && images.length > 0 ? images : undefined,
         seller_id: (formData as any).seller_id || undefined,
       };
 
@@ -432,7 +465,7 @@ export default function ProductForm({ visible, onClose, onSuccess, product }: Pr
               {/* زر إضافة الصور */}
               <TouchableOpacity 
                 style={[styles.professionalButton, uploadingImage && styles.disabledButton]} 
-                onPress={() => Alert.alert('معلومة', 'ميزة رفع الصور غير متاحة حالياً')}
+                onPress={pickAndUploadImage}
                 disabled={uploadingImage}
               >
                 <View style={styles.buttonContent}>

@@ -219,6 +219,8 @@ export const sellers = pgTable('sellers', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   phoneNumber: varchar('phone_number', { length: 30 }),
+  // الموقع/المكان
+  location: varchar('location', { length: 255 }),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

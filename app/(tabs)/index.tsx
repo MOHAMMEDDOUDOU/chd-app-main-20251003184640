@@ -445,11 +445,11 @@ export default function HomeScreen() {
           <View style={styles.priceContainer}>
             {product.discountPrice && parseFloat(product.discountPrice) < parseFloat(product.price) ? (
               <>
-                <Text style={styles.price}>${parseFloat(product.discountPrice).toFixed(2)}</Text>
-                <Text style={styles.originalPrice}>${parseFloat(product.price).toFixed(2)}</Text>
+                <Text style={styles.price}>{parseFloat(product.discountPrice).toLocaleString()} دج</Text>
+                <Text style={styles.originalPrice}>{parseFloat(product.price).toLocaleString()} دج</Text>
               </>
             ) : (
-              <Text style={styles.price}>${parseFloat(product.price).toFixed(2)}</Text>
+              <Text style={styles.price}>{parseFloat(product.price).toLocaleString()} دج</Text>
             )}
           </View>
           
@@ -561,11 +561,11 @@ export default function HomeScreen() {
           <View style={styles.discountPriceContainer}>
             {product.discountPrice && parseFloat(product.discountPrice) < parseFloat(product.price) ? (
               <>
-                <Text style={styles.discountNewPrice}>${parseFloat(product.discountPrice).toFixed(2)}</Text>
-                <Text style={styles.discountOldPrice}>${parseFloat(product.price).toFixed(2)}</Text>
+                <Text style={styles.discountNewPrice}>{parseFloat(product.discountPrice).toLocaleString()} دج</Text>
+                <Text style={styles.discountOldPrice}>{parseFloat(product.price).toLocaleString()} دج</Text>
               </>
             ) : (
-              <Text style={styles.discountNewPrice}>${parseFloat(product.price).toFixed(2)}</Text>
+              <Text style={styles.discountNewPrice}>{parseFloat(product.price).toLocaleString()} دج</Text>
             )}
           </View>
           <TouchableOpacity 
@@ -614,9 +614,9 @@ export default function HomeScreen() {
           <Text style={styles.offerTitle}>{offer.name}</Text>
           <Text style={styles.offerDescription} numberOfLines={2}>{offer.description}</Text>
           <View style={styles.offerPriceContainer}>
-            <Text style={styles.offerPrice}>${parseFloat(offer.price).toFixed(2)}</Text>
+            <Text style={styles.offerPrice}>{parseFloat(offer.price).toLocaleString()} دج</Text>
             {offer.discountPrice && (
-              <Text style={styles.offerDiscountPrice}>${parseFloat(offer.discountPrice).toFixed(2)}</Text>
+              <Text style={styles.offerDiscountPrice}>{parseFloat(offer.discountPrice).toLocaleString()} دج</Text>
             )}
           </View>
           <TouchableOpacity 
@@ -831,7 +831,7 @@ export default function HomeScreen() {
                           {product.name}
                         </Text>
                         <Text style={styles.searchResultPrice}>
-                          ${parseFloat(product.price).toFixed(2)}
+                          {parseFloat(product.price).toLocaleString()} دج
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -865,7 +865,7 @@ export default function HomeScreen() {
                           {offer.name}
                         </Text>
                         <Text style={styles.searchResultPrice}>
-                          ${parseFloat(offer.price).toFixed(2)}
+                          {parseFloat(offer.price).toLocaleString()} دج
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -933,9 +933,9 @@ export default function HomeScreen() {
                         <View style={styles.heroOfferContent}>
                           <Text style={styles.heroOfferTitle} numberOfLines={1}>{item.name}</Text>
                           <View style={styles.heroOfferPriceContainer}>
-                            <Text style={styles.heroOfferPrice}>${parseFloat(item.price).toFixed(2)}</Text>
+                            <Text style={styles.heroOfferPrice}>{parseFloat(item.price).toLocaleString()} دج</Text>
                             {item.discountPrice && (
-                              <Text style={styles.heroOfferDiscountPrice}>${parseFloat(item.discountPrice).toFixed(2)}</Text>
+                              <Text style={styles.heroOfferDiscountPrice}>{parseFloat(item.discountPrice).toLocaleString()} دج</Text>
                             )}
                           </View>
                           <TouchableOpacity style={styles.heroOfferButton} onPress={() => handleOrderNow(item, 'offer')}>

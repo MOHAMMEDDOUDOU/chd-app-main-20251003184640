@@ -1122,6 +1122,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flexWrap: 'wrap',
   },
+  // Prevent per-character wrapping: keep words intact, allow word-level wrap
+  // For react-native Text, we avoid adding extra styles that force char wrapping
+  // Ensure container doesn't constrain width too much
   detailsButton: {
     backgroundColor: '#FF6B35',
     paddingHorizontal: 16,

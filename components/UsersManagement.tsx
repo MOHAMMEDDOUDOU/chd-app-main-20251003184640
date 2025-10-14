@@ -99,7 +99,7 @@ export default function UsersManagement(_: Props) {
               </View>
             </View>
 
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 80 }} showsVerticalScrollIndicator={false}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: userOrders.length > 0 ? 60 : 16 }} showsVerticalScrollIndicator={false}>
               {userOrders.length === 0 ? (
                 <View style={styles.center}><Text style={styles.muted}>لا توجد طلبيات</Text></View>
               ) : (
@@ -132,6 +132,7 @@ export default function UsersManagement(_: Props) {
               )}
             </ScrollView>
             {/* User total profit footer */}
+            {userOrders.length > 0 && (
             <View style={styles.userProfitFooter}>
               <Text style={styles.userProfitFooterText}>
                 إجمالي الفائدة: {
@@ -148,6 +149,7 @@ export default function UsersManagement(_: Props) {
                 }
               </Text>
             </View>
+            )}
           </View>
         </View>
       )}

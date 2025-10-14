@@ -432,7 +432,7 @@ export default function HomeScreen() {
             resizeMode="contain"
           />
           {/* Removed heart/favorite button as requested */}
-          {product.discountPercentage && product.discountPercentage > 0 && (
+          {product.discountPercentage && Number(product.discountPercentage) > 0 && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>-{product.discountPercentage}%</Text>
             </View>
@@ -547,11 +547,13 @@ export default function HomeScreen() {
             style={[styles.discountImage, { aspectRatio: imageAspectRatio, height: undefined }]}
             resizeMode="contain"
           />
-          <View style={styles.discountBadge}>
-            <Text style={styles.discountBadgeText}>
-              {Math.round(((parseFloat(product.price) - parseFloat(product.discountPrice || '0')) / parseFloat(product.price)) * 100)}%
-            </Text>
-          </View>
+          {product.discountPrice && parseFloat(product.discountPrice) > 0 && parseFloat(product.discountPrice) < parseFloat(product.price) && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountBadgeText}>
+                {Math.round(((parseFloat(product.price) - parseFloat(product.discountPrice)) / parseFloat(product.price)) * 100)}%
+              </Text>
+            </View>
+          )}
 
         </View>
         <View style={styles.discountContent}>

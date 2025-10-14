@@ -898,6 +898,16 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                       <View style={styles.statusButtonsContainer}>
                         <Text style={styles.statusButtonsLabel}>تغيير الحالة:</Text>
                         <View style={styles.statusButtonsRow}>
+                          <View style={styles.dropdownContainer}>
+                            <TouchableOpacity
+                              style={styles.dropdownButton}
+                              activeOpacity={0.8}
+                              onPress={() => setShowStatusModal(true)}
+                            >
+                              <Text style={styles.dropdownButtonText}>{getStatusText(selectedOrderForDetails.status)}</Text>
+                            </TouchableOpacity>
+                          </View>
+                          {false && (
                           <TouchableOpacity
                             style={[styles.statusButton, selectedOrderForDetails.status === 'in_progress' && styles.activeStatusButton]}
                             onPress={() => handleStatusChange(selectedOrderForDetails.id, 'in_progress')}
@@ -962,6 +972,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                           </TouchableOpacity>
                           
 
+                          )}
                         </View>
                       </View>
                     </View>
@@ -1313,6 +1324,24 @@ const styles = StyleSheet.create({
   statusButtonsRow: {
     flexDirection: 'row',
     gap: 8,
+  },
+  dropdownContainer: {
+    flex: 1,
+  },
+  dropdownButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownButtonText: {
+    fontSize: 14,
+    color: '#1F2937',
+    fontWeight: '600',
   },
   statusButton: {
     flex: 1,

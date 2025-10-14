@@ -190,40 +190,24 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
     setShowStatusModal(true);
   };
 
-  const handleDeleteOrder = (order: any) => {
-    Alert.alert(
-      'تأكيد الحذف',
-      `هل أنت متأكد من حذف طلب "${order.itemName}"؟`,
-      [
-        { text: 'إلغاء', style: 'cancel' },
-        {
-          text: 'حذف',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const result = await deleteOrder(order.id);
-              if (result.success) {
-                Alert.alert('✅ نجح', 'تم حذف الطلب بنجاح');
-                // حدّث القائمة محلياً لإظهار النتيجة فوراً
-                setOrders(prev => prev.filter(o => o.id !== order.id));
-                // إغلاق نافذة التفاصيل إن كانت تعرض هذه الطلبية
-                if (selectedOrderForDetails && selectedOrderForDetails.id === order.id) {
-                  setShowDetailsModal(false);
-                  setSelectedOrderForDetails(null);
-                }
-                // إعادة تحميل الطلبات من قاعدة البيانات لضمان التزامن
-                await loadOrders();
-              } else {
-                Alert.alert('خطأ', result.error || 'فشل في حذف الطلب');
-              }
-            } catch (error) {
-              console.error('Error deleting order:', error);
-              Alert.alert('خطأ', 'حدث خطأ في حذف الطلب');
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteOrder = async (order: any) => {
+    try {
+      const result = await deleteOrder(order.id);
+      if (result.success) {
+        // إزالة فورياً من القائمة
+        setOrders(prev => prev.filter(o => o.id !== order.id));
+        if (selectedOrderForDetails && selectedOrderForDetails.id === order.id) {
+          setShowDetailsModal(false);
+          setSelectedOrderForDetails(null);
+        }
+        await loadOrders();
+      } else {
+        Alert.alert('خطأ', result.error || 'فشل في أرشفة الطلب');
+      }
+    } catch (error) {
+      console.error('Error archiving order:', error);
+      Alert.alert('خطأ', 'حدث خطأ في أرشفة الطلب');
+    }
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: any) => {

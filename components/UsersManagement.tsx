@@ -84,7 +84,7 @@ export default function UsersManagement(_: Props) {
       {/* User Orders Modal - Styled like OrdersManagement details */}
       {showOrdersModal && (
         <View style={styles.modalOverlay}>
-          <View style={[styles.detailsModalContainer, { height: Math.min(600, 140 + Math.max(1, userOrders.length) * 130) }]}>
+          <View style={styles.detailsModalContainer}>
             <View style={styles.detailsModalHeader}>
               <View style={styles.headerGradient}>
                 <View style={styles.headerContentLikeOrders}>
@@ -99,7 +99,7 @@ export default function UsersManagement(_: Props) {
               </View>
             </View>
 
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: userOrders.length > 0 ? 60 : 16 }} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={{ padding: 16 }} showsVerticalScrollIndicator={false}>
               {userOrders.length === 0 ? (
                 <View style={styles.center}><Text style={styles.muted}>لا توجد طلبيات</Text></View>
               ) : (
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   detailsText: { color: '#FFFFFF', fontWeight: '700' },
   modalOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   // match OrdersManagement modal styles (simplified)
-  detailsModalContainer: { width: '96%', height: '90%', backgroundColor: '#FFFFFF', borderRadius: 20, overflow: 'hidden' },
+  detailsModalContainer: { width: '96%', maxHeight: '90%', backgroundColor: '#FFFFFF', borderRadius: 20, overflow: 'hidden' },
   detailsModalHeader: { backgroundColor: '#FF6B35' },
   headerGradient: { backgroundColor: '#FF6B35', paddingTop: 16, paddingBottom: 16, paddingHorizontal: 16 },
   headerContentLikeOrders: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

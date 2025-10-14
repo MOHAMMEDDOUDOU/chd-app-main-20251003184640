@@ -159,6 +159,11 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
     loadOrders();
   }, []);
 
+  // إعادة تحميل حسب المؤرشف/غير المؤرشف
+  useEffect(() => {
+    loadOrders();
+  }, [showArchived]);
+
   // فتح الواتساب مع العميل
   const openWhatsApp = (phoneNumber: string, orderDetails: string) => {
     const formattedPhone = phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber;
@@ -521,12 +526,10 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
               <View style={styles.simpleRow}>
                 {/* Order Name */}
                 <View style={styles.orderNameSection}>
-                  <Text style={styles.orderName}>
-                    طلبية في {order.itemName}
-                  </Text>
-                  <Text style={styles.orderDate}>
-                    {formatDate(order.createdAt)}
-                  </Text>
+                  <View style={styles.orderNamePill}>
+                    <Text style={styles.orderNameText}>طلبية في {order.itemName}</Text>
+                  </View>
+                  <Text style={styles.orderDate}>{formatDate(order.createdAt)}</Text>
                 </View>
 
                 {/* Status Badge */}
@@ -1132,14 +1135,19 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 12,
   },
-  orderName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+  orderNamePill: {
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FFE4D5',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     marginBottom: 4,
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-    numberOfLines: 1,
+  },
+  orderNameText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1F2937',
   },
   orderDate: {
     fontSize: 12,

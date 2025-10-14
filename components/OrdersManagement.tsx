@@ -107,6 +107,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any | null>(null);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
   // تحميل الطلبات
   const loadOrders = async () => {
@@ -525,7 +526,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
               <View style={styles.simpleRow}>
                 {/* Order Name */}
                 <View style={styles.orderNameSection}>
-                  <Text style={styles.orderName}>
+                  <Text style={styles.orderName} numberOfLines={1} ellipsizeMode="tail">
                     طلبية في {order.itemName}
                   </Text>
                   <Text style={styles.orderDate}>
@@ -902,10 +903,33 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                             <TouchableOpacity
                               style={styles.dropdownButton}
                               activeOpacity={0.8}
-                              onPress={() => setShowStatusModal(true)}
+                              onPress={() => setShowStatusDropdown(prev => !prev)}
                             >
                               <Text style={styles.dropdownButtonText}>{getStatusText(selectedOrderForDetails.status)}</Text>
                             </TouchableOpacity>
+                            {showStatusDropdown && (
+                              <View style={styles.dropdownMenu}>
+                                {[
+                                  { key: 'pending', label: 'قيد المعالجة' },
+                                  { key: 'confirmed', label: 'مؤكد' },
+                                  { key: 'in_progress', label: 'قيد الشحن' },
+                                  { key: 'delivered', label: 'تم التسليم' },
+                                  { key: 'out_of_stock', label: 'نفد المخزون' },
+                                  { key: 'cancelled', label: 'ملغي' },
+                                ].map(opt => (
+                                  <TouchableOpacity
+                                    key={opt.key}
+                                    style={styles.dropdownItem}
+                                    onPress={() => {
+                                      setShowStatusDropdown(false);
+                                      handleStatusChange(selectedOrderForDetails.id, opt.key as any);
+                                    }}
+                                  >
+                                    <Text style={styles.dropdownItemText}>{opt.label}</Text>
+                                  </TouchableOpacity>
+                                ))}
+                              </View>
+                            )}
                           </View>
                           {false && (<>
                           <TouchableOpacity
@@ -1118,6 +1142,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 4,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+    numberOfLines: 1,
   },
   orderDate: {
     fontSize: 12,
@@ -1341,6 +1368,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1F2937',
     fontWeight: '600',
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: 48,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    zIndex: 100,
+  },
+  dropdownItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    color: '#1F2937',
   },
   statusButton: {
     flex: 1,

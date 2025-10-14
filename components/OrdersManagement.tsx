@@ -437,71 +437,71 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
       <View style={styles.filterContainer}>
         <Filter size={16} color="#6B7280" />
         <Text style={styles.filterLabel}>تصفية حسب الحالة:</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
-          <TouchableOpacity
-            style={[styles.filterButton, showArchived && styles.activeFilterButton]}
-            onPress={() => { setShowArchived(prev => !prev); }}
-          >
-            <Text style={[styles.filterButtonText, showArchived && styles.activeFilterButtonText]}>
-              الطلبات المؤرشفة
-            </Text>
-          </TouchableOpacity>
-        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
-            style={[styles.filterButton, statusFilter === 'all' && styles.activeFilterButton]}
-            onPress={() => setStatusFilter('all')}
+            style={[styles.filterButton, !showArchived && statusFilter === 'all' && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(false); setStatusFilter('all'); }}
           >
-            <Text style={[styles.filterButtonText, statusFilter === 'all' && styles.activeFilterButtonText]}>
+            <Text style={[styles.filterButtonText, !showArchived && statusFilter === 'all' && styles.activeFilterButtonText]}>
               جميع الطلبات
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.filterButton, statusFilter === 'pending' && styles.activeFilterButton]}
-            onPress={() => setStatusFilter('pending')}
+            style={[styles.filterButton, !showArchived && statusFilter === 'pending' && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(false); setStatusFilter('pending'); }}
           >
-            <Text style={[styles.filterButtonText, statusFilter === 'pending' && styles.activeFilterButtonText]}>
+            <Text style={[styles.filterButtonText, !showArchived && statusFilter === 'pending' && styles.activeFilterButtonText]}>
               قيد المعالجة
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.filterButton, statusFilter === 'confirmed' && styles.activeFilterButton]}
-            onPress={() => setStatusFilter('confirmed')}
+            style={[styles.filterButton, !showArchived && statusFilter === 'confirmed' && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(false); setStatusFilter('confirmed'); }}
           >
-            <Text style={[styles.filterButtonText, statusFilter === 'confirmed' && styles.activeFilterButtonText]}>
+            <Text style={[styles.filterButtonText, !showArchived && statusFilter === 'confirmed' && styles.activeFilterButtonText]}>
               مؤكد
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.filterButton, statusFilter === 'cancelled' && styles.activeFilterButton]}
-            onPress={() => setStatusFilter('cancelled')}
+            style={[styles.filterButton, !showArchived && statusFilter === 'cancelled' && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(false); setStatusFilter('cancelled'); }}
           >
-            <Text style={[styles.filterButtonText, statusFilter === 'cancelled' && styles.activeFilterButtonText]}>
+            <Text style={[styles.filterButtonText, !showArchived && statusFilter === 'cancelled' && styles.activeFilterButtonText]}>
               ملغي
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.filterButton, statusFilter === 'in_progress' && styles.activeFilterButton]}
-            onPress={() => setStatusFilter('in_progress')}
+            style={[styles.filterButton, !showArchived && statusFilter === 'in_progress' && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(false); setStatusFilter('in_progress'); }}
           >
-            <Text style={[styles.filterButtonText, statusFilter === 'in_progress' && styles.activeFilterButtonText]}>
+            <Text style={[styles.filterButtonText, !showArchived && statusFilter === 'in_progress' && styles.activeFilterButtonText]}>
               قيد الشحن
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.filterButton, statusFilter === 'delivered' && styles.activeFilterButton]}
-            onPress={() => setStatusFilter('delivered')}
+            style={[styles.filterButton, !showArchived && statusFilter === 'delivered' && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(false); setStatusFilter('delivered'); }}
           >
-            <Text style={[styles.filterButtonText, statusFilter === 'delivered' && styles.activeFilterButtonText]}>
+            <Text style={[styles.filterButtonText, !showArchived && statusFilter === 'delivered' && styles.activeFilterButtonText]}>
               تم التسليم
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.filterButton, statusFilter === 'out_of_stock' && styles.activeFilterButton]}
-            onPress={() => setStatusFilter('out_of_stock')}
+            style={[styles.filterButton, !showArchived && statusFilter === 'out_of_stock' && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(false); setStatusFilter('out_of_stock'); }}
           >
-            <Text style={[styles.filterButtonText, statusFilter === 'out_of_stock' && styles.activeFilterButtonText]}>
+            <Text style={[styles.filterButtonText, !showArchived && statusFilter === 'out_of_stock' && styles.activeFilterButtonText]}>
               نفد المخزون
+            </Text>
+          </TouchableOpacity>
+
+          {/* Archived filter inside the same row */}
+          <TouchableOpacity
+            style={[styles.filterButton, showArchived && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(true); setStatusFilter('all'); }}
+          >
+            <Text style={[styles.filterButtonText, showArchived && styles.activeFilterButtonText]}>
+              الطلبات المؤرشفة
             </Text>
           </TouchableOpacity>
 
@@ -522,13 +522,22 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
         ) : (
           filteredOrders.map((order) => (
             <View key={order.id} style={styles.orderCard}>
-              {/* Simple Order Design */}
+              {/* Order name header - full width, single horizontal line */}
+              <View style={styles.orderNameHeader}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <Text
+                    style={styles.orderNameHeaderText}
+                    numberOfLines={1}
+                  >
+                    طلبية في {order.itemName}
+                  </Text>
+                </ScrollView>
+              </View>
+
+              {/* Row content */}
               <View style={styles.simpleRow}>
-                {/* Order Name */}
+                {/* Order meta (date) */}
                 <View style={styles.orderNameSection}>
-                  <View style={styles.orderNamePill}>
-                    <Text style={styles.orderNameText}>طلبية في {order.itemName}</Text>
-                  </View>
                   <Text style={styles.orderDate}>{formatDate(order.createdAt)}</Text>
                 </View>
 
@@ -1134,6 +1143,21 @@ const styles = StyleSheet.create({
   orderNameSection: {
     flex: 1,
     marginRight: 12,
+  },
+  orderNameHeader: {
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FFE4D5',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  orderNameHeaderText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1F2937',
+    textAlign: 'right',
   },
   orderNamePill: {
     backgroundColor: '#FFF7ED',

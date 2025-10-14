@@ -907,7 +907,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                               <Text style={styles.dropdownButtonText}>{getStatusText(selectedOrderForDetails.status)}</Text>
                             </TouchableOpacity>
                           </View>
-                          {false && (
+                          {false && (<>
                           <TouchableOpacity
                             style={[styles.statusButton, selectedOrderForDetails.status === 'in_progress' && styles.activeStatusButton]}
                             onPress={() => handleStatusChange(selectedOrderForDetails.id, 'in_progress')}
@@ -971,7 +971,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                             </Text>
                           </TouchableOpacity>
                           
-                          )}
+                          </>)}
                         </View>
                       </View>
                     </View>

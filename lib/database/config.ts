@@ -147,6 +147,7 @@ export const orders = pgTable('orders', {
   trackingNumber: varchar('tracking_number', { length: 50 }),
   imageUrl: text('image_url'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  isArchived: boolean('is_archived').default(false),
 }, (table) => ({
   itemIdx: index('idx_orders_item').on(table.itemType, table.itemId),
   createdAtIdx: index('idx_orders_created_at').on(table.createdAt),
@@ -154,6 +155,7 @@ export const orders = pgTable('orders', {
   orderLinkIdx: index('idx_orders_order_link').on(table.orderLink),
   sellerIdx: index('idx_orders_seller').on(table.sellerId),
   resellerUserIdx: index('idx_orders_reseller_user').on(table.resellerUserId),
+  archivedIdx: index('idx_orders_is_archived').on(table.isArchived),
 }));
 
 // Login attempts table

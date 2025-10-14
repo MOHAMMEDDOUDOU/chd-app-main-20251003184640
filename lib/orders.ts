@@ -64,12 +64,14 @@ export interface UpdateOrderData {
     | 'نفد المخزون';
   resellerPrice?: number;
   trackingNumber?: string;
+  isArchived?: boolean;
 }
 
 // الحصول على جميع الطلبات مع معلومات البائع والمشتري والمنتج/العرض الأصلي
 export async function getOrders() {
   try {
     const result = await db.query.orders.findMany({
+      where: eq(orders.isArchived, false as any),
       orderBy: (orders, { desc }) => [desc(orders.createdAt)]
     });
     
@@ -244,6 +246,19 @@ export async function getOrders() {
   }
 }
 
+export async function getArchivedOrders() {
+  try {
+    const rows = await db.query.orders.findMany({
+      where: eq(orders.isArchived, true as any),
+      orderBy: (orders, { desc }) => [desc(orders.createdAt)]
+    });
+    return { success: true, orders: rows };
+  } catch (error) {
+    console.error('Error fetching archived orders:', error);
+    return { success: false, error: 'فشل في تحميل الطلبات المؤرشفة' };
+  }
+}
+
 // الحصول على طلب واحد
 export async function getOrder(id: string) {
   try {
@@ -326,6 +341,7 @@ export async function updateOrder(id: string, data: UpdateOrderData) {
     if (data.status !== undefined) updateData.status = data.status;
     if (data.resellerPrice !== undefined) updateData.resellerPrice = data.resellerPrice.toString();
     if (data.trackingNumber !== undefined) updateData.trackingNumber = data.trackingNumber;
+    if (data.isArchived !== undefined) (updateData as any).isArchived = data.isArchived;
     
     const [updatedOrder] = await db.update(orders)
       .set(updateData)
@@ -355,21 +371,15 @@ export async function updateOrder(id: string, data: UpdateOrderData) {
 // حذف طلب
 export async function deleteOrder(id: string) {
   try {
-    const [deletedOrder] = await db.delete(orders)
+    const [archived] = await db.update(orders)
+      .set({ isArchived: true as any })
       .where(eq(orders.id, id))
       .returning();
-    
-    if (!deletedOrder) {
-      return {
-        success: false,
-        error: 'الطلب غير موجود'
-      };
+
+    if (!archived) {
+      return { success: false, error: 'الطلب غير موجود' };
     }
-    
-    return {
-      success: true,
-      order: deletedOrder
-    };
+    return { success: true, order: archived };
   } catch (error) {
     console.error('Error deleting order:', error);
     return {

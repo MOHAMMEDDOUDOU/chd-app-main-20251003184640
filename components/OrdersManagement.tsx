@@ -11,7 +11,7 @@ import {
   Modal,
 } from 'react-native';
 import { Search, Filter, Eye, Edit, Trash2, MessageCircle, X } from 'lucide-react-native';
-import { getOrders, deleteOrder, updateOrder } from '../lib/orders';
+import { getOrders, getArchivedOrders, deleteOrder, updateOrder } from '../lib/orders';
 import ZRExpressAPI from '../lib/zr-express-api';
 import OrderStatusModal from './OrderStatusModal';
 
@@ -103,6 +103,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showArchived, setShowArchived] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -114,7 +115,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
     try {
       setLoading(true);
       console.log('🔄 Loading orders...');
-      const result = await getOrders();
+      const result = showArchived ? await getArchivedOrders() : await getOrders();
       console.log('📥 Orders result:', result);
       
       if (result.success) {
@@ -447,6 +448,16 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
       <View style={styles.filterContainer}>
         <Filter size={16} color="#6B7280" />
         <Text style={styles.filterLabel}>تصفية حسب الحالة:</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
+          <TouchableOpacity
+            style={[styles.filterButton, showArchived && styles.activeFilterButton]}
+            onPress={() => { setShowArchived(prev => !prev); }}
+          >
+            <Text style={[styles.filterButtonText, showArchived && styles.activeFilterButtonText]}>
+              الطلبات المؤرشفة
+            </Text>
+          </TouchableOpacity>
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
             style={[styles.filterButton, statusFilter === 'all' && styles.activeFilterButton]}
@@ -555,11 +566,11 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                     <Text style={styles.detailsButtonText}>عرض التفاصيل</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.deleteButton}
+                    style={styles.archiveButton}
                     onPress={() => handleDeleteOrder(order)}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.deleteButtonText}>حذف</Text>
+                    <Text style={styles.archiveButtonText}>أرشفة</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1201,6 +1212,19 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  archiveButton: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  archiveButtonText: {
+    color: '#111827',
     fontSize: 14,
     fontWeight: '700',
   },

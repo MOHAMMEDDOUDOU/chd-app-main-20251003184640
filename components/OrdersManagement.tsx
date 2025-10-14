@@ -526,7 +526,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
               <View style={styles.simpleRow}>
                 {/* Order Name */}
                 <View style={styles.orderNameSection}>
-                  <Text style={styles.orderName} numberOfLines={1} ellipsizeMode="tail">
+                  <Text style={styles.orderName}>
                     طلبية في {order.itemName}
                   </Text>
                   <Text style={styles.orderDate}>
@@ -1278,7 +1278,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   sectionHeader: {
     backgroundColor: '#F8F9FA',
@@ -1371,19 +1371,20 @@ const styles = StyleSheet.create({
   },
   dropdownMenu: {
     position: 'absolute',
-    top: 48,
+    top: 0,
     left: 0,
     right: 0,
+    transform: [{ translateY: 44 }],
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
     borderRadius: 8,
-    elevation: 6,
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    zIndex: 100,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    zIndex: 1000,
   },
   dropdownItem: {
     paddingHorizontal: 16,

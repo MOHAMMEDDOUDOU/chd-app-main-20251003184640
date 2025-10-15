@@ -2,7 +2,7 @@
   "expo": {
     "name": "VERMAX",
     "slug": "vermax2025",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/logo-removebg-preview_p22obg.png",
     "splash": {
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.mohadoudou.vermaxnext",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "We need microphone access to record voice messages.",
         "ITSAppUsesNonExemptEncryption": false
@@ -35,7 +35,7 @@
         "android.permission.INTERNET"
       ],
       "package": "com.mohadoudou.vermaxnext",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "bundler": "metro",

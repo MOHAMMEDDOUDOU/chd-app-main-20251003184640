@@ -818,7 +818,11 @@ export default function HomeScreen() {
                   contentContainerStyle={styles.searchResultsList}
                 >
                   {filteredProducts.slice(0, 5).map(product => (
-                    <TouchableOpacity key={product.id} style={styles.searchResultItem}>
+                    <TouchableOpacity 
+                      key={product.id} 
+                      style={styles.searchResultItem}
+                      onPress={() => router.push({ pathname: '/product/[id]', params: { id: product.id } })}
+                    >
                       <Image 
                         source={{ 
                           uri: product.imageUrl || 'https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg' 
@@ -852,7 +856,11 @@ export default function HomeScreen() {
                   contentContainerStyle={styles.searchResultsList}
                 >
                   {filteredOffers.slice(0, 5).map(offer => (
-                    <TouchableOpacity key={offer.id} style={styles.searchResultItem}>
+                    <TouchableOpacity 
+                      key={offer.id} 
+                      style={styles.searchResultItem}
+                      onPress={() => router.push({ pathname: '/offer/[id]', params: { id: offer.id } })}
+                    >
                       <Image 
                         source={{ 
                           uri: offer.imageUrl || 'https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg' 

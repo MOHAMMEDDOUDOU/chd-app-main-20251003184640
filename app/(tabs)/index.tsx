@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Filter, Star, ShoppingCart, Bell, Menu, User, ShoppingBag } from 'lucide-react-native';
 import * as Linking from 'expo-linking';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { getProducts, getOffers } from '../../lib/products';
@@ -1067,10 +1067,7 @@ export default function HomeScreen() {
           }
         }}
       >
-        <Image
-          source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg' }}
-          style={{ width: 28, height: 28, tintColor: '#FFFFFF' }}
-        />
+        <FontAwesome name="whatsapp" size={28} color="#FFFFFF" />
       </TouchableOpacity>
     </SafeAreaView>
   );

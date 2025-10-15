@@ -88,36 +88,83 @@ export default function UserOrdersScreen() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    const s = String(status || '').toLowerCase();
+    switch (s) {
       case 'قيد المعالجة':
+      case 'pending':
         return '#F59E0B';
       case 'مؤكد':
+      case 'confirmed':
         return '#3B82F6';
       case 'قيد الشحن':
+      case 'in_progress':
         return '#6366F1';
       case 'تم التسليم':
+      case 'delivered':
         return '#10B981';
+      case 'ملغي':
       case 'ملغية':
+      case 'cancelled':
         return '#EF4444';
+      case 'نفد المخزون':
+      case 'out_of_stock':
+        return '#6B7280';
       default:
         return '#6B7280';
     }
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    const s = String(status || '').toLowerCase();
+    switch (s) {
       case 'قيد المعالجة':
+      case 'pending':
         return <Clock size={16} color="#F59E0B" />;
       case 'مؤكد':
+      case 'confirmed':
         return <CheckCircle size={16} color="#3B82F6" />;
       case 'قيد الشحن':
+      case 'in_progress':
         return <Clock size={16} color="#6366F1" />;
       case 'تم التسليم':
+      case 'delivered':
         return <CheckCircle size={16} color="#10B981" />;
+      case 'ملغي':
       case 'ملغية':
+      case 'cancelled':
         return <XCircle size={16} color="#EF4444" />;
+      case 'نفد المخزون':
+      case 'out_of_stock':
+        return <Package size={16} color="#6B7280" />;
       default:
         return <Package size={16} color="#6B7280" />;
+    }
+  };
+
+  const getStatusTextAr = (status: string) => {
+    const s = String(status || '').toLowerCase();
+    switch (s) {
+      case 'pending':
+      case 'قيد المعالجة':
+        return 'قيد المعالجة';
+      case 'confirmed':
+      case 'مؤكد':
+        return 'مؤكد';
+      case 'in_progress':
+      case 'قيد الشحن':
+        return 'قيد الشحن';
+      case 'delivered':
+      case 'تم التسليم':
+        return 'تم التسليم';
+      case 'cancelled':
+      case 'ملغي':
+      case 'ملغية':
+        return 'ملغي';
+      case 'out_of_stock':
+      case 'نفد المخزون':
+        return 'نفد المخزون';
+      default:
+        return status || 'غير محدد';
     }
   };
 
@@ -223,7 +270,7 @@ export default function UserOrdersScreen() {
                   {getStatusIcon(order.status)}
                   <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
                     <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
-                      {order.status}
+                      {getStatusTextAr(order.status)}
                     </Text>
                   </View>
                 </View>
@@ -350,8 +397,8 @@ export default function UserOrdersScreen() {
                   <View style={styles.statusRow}>
                     {getStatusIcon(selectedOrder.status)}
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedOrder.status) + '20' }]}>
-                      <Text style={[styles.statusText, { color: getStatusColor(selectedOrder.status) }]}>
-                        {selectedOrder.status}
+                      <Text style={[styles.statusText, { color: getStatusColor(selectedOrder.status) }]}> 
+                        {getStatusTextAr(selectedOrder.status)}
                       </Text>
                     </View>
                   </View>

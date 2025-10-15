@@ -417,6 +417,12 @@ export default function UserOrdersScreen() {
         </View>
       </Modal>
 
+      {/* Note below orders */}
+      <View style={styles.noteContainer}>
+        <Ionicons name="information-circle-outline" size={16} color="#6B7280" />
+        <Text style={styles.noteText}>ملاحظة: تُستلم الفائدة بعد تسليم الطلبية للزبون.</Text>
+      </View>
+
       {/* Profit Footer with WhatsApp button */}
       <View style={styles.profitFooter}>
         <Text style={styles.profitFooterText}>مجموع الفائدة: {totalProfit.toLocaleString()} دج</Text>
@@ -563,6 +569,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#10B981',
+  },
+  noteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+  },
+  noteText: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
   },
   emptyContainer: {
     flex: 1,

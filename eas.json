@@ -2,9 +2,10 @@
   "cli": { "version": ">= 11.0.0", "appVersionSource": "remote" },
   "build": {
     "preview": {
-      "android": { "buildType": "app-bundle" }
+      "android": { "buildType": "app-bundle", "credentialsSource": "local" }
     },
     "production": {
+      "android": { "buildType": "app-bundle", "credentialsSource": "local" },
       "ios": {
         "image": "latest"
       }

@@ -89,14 +89,14 @@ export default function OfferDetails() {
     router.push({ pathname: '/create-order', params: { data: JSON.stringify(orderData) } });
   };
 
-  if (loading) return <Text style={{ padding: 20 }}>جاري التحميل...</Text>;
-  if (error) return <Text style={{ padding: 20 }}>{error}</Text>;
-  if (!offer) return null;
-
   const imagesToShow = useMemo(() => {
     const fallback = [offer?.imageUrl || (offer as any)?.image_url].filter(Boolean) as string[];
     return (imageUrls.length > 0 ? imageUrls : fallback);
   }, [imageUrls, offer]);
+
+  if (loading) return <Text style={{ padding: 20 }}>جاري التحميل...</Text>;
+  if (error) return <Text style={{ padding: 20 }}>{error}</Text>;
+  if (!offer) return null;
 
   return (
     <View style={styles.container}>

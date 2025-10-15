@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useMemo as useMemoHook } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -89,14 +89,14 @@ export default function ProductDetails() {
     router.push({ pathname: '/create-order', params: { data: JSON.stringify(orderData) } });
   };
 
-  if (loading) return <Text style={{ padding: 20 }}>جاري التحميل...</Text>;
-  if (error) return <Text style={{ padding: 20 }}>{error}</Text>;
-  if (!product) return null;
-
   const imagesToShow = useMemo(() => {
     const fallback = [product?.imageUrl || (product as any)?.image_url].filter(Boolean) as string[];
     return (imageUrls.length > 0 ? imageUrls : fallback);
   }, [imageUrls, product]);
+
+  if (loading) return <Text style={{ padding: 20 }}>جاري التحميل...</Text>;
+  if (error) return <Text style={{ padding: 20 }}>{error}</Text>;
+  if (!product) return null;
 
   return (
     <View style={styles.container}>

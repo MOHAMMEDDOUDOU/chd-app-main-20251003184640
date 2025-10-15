@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useMemo as useMemoHook } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ export default function ProductDetails() {
   const [error, setError] = useState<string | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const screenWidth = Dimensions.get('window').width;
+  const [activeIndex, setActiveIndex] = useState(0);
   const { user } = useUser();
 
   useEffect(() => {
@@ -92,6 +93,11 @@ export default function ProductDetails() {
   if (error) return <Text style={{ padding: 20 }}>{error}</Text>;
   if (!product) return null;
 
+  const imagesToShow = useMemo(() => {
+    const fallback = [product?.imageUrl || (product as any)?.image_url].filter(Boolean) as string[];
+    return (imageUrls.length > 0 ? imageUrls : fallback);
+  }, [imageUrls, product]);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -105,11 +111,27 @@ export default function ProductDetails() {
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {/* Images carousel */}
-        <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
-          {(imageUrls.length > 0 ? imageUrls : [product.imageUrl || (product as any).image_url]).filter(Boolean).map((uri, idx) => (
+        <ScrollView 
+          horizontal 
+          pagingEnabled 
+          showsHorizontalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={(e) => {
+            const x = e.nativeEvent.contentOffset.x;
+            const idx = Math.round(x / screenWidth);
+            if (idx !== activeIndex) setActiveIndex(idx);
+          }}
+        >
+          {imagesToShow.map((uri, idx) => (
             <Image key={idx} source={{ uri: String(uri) }} style={[styles.image, { width: screenWidth }]} resizeMode="contain" />
           ))}
         </ScrollView>
+        {/* Dots */}
+        <View style={styles.dotsContainer}>
+          {imagesToShow.map((_, idx) => (
+            <View key={idx} style={[styles.dot, idx === activeIndex && styles.dotActive]} />
+          ))}
+        </View>
 
         <View style={styles.content}>
           <Text style={styles.title}>{product.name}</Text>
@@ -158,6 +180,9 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 16, fontWeight: 'bold', color: '#1F2937' },
 
   image: { height: 320 },
+  dotsContainer: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingVertical: 8 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E5E7EB' },
+  dotActive: { backgroundColor: '#FF6B35' },
   content: { padding: 16 },
   title: { fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 8, textAlign: 'right' },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },

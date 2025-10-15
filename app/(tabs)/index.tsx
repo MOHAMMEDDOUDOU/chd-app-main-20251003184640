@@ -930,7 +930,11 @@ export default function HomeScreen() {
                 >
                   {offers.map((item, index) => (
                     <View key={item.id} style={{ width: carouselWidth, alignItems: 'center' }}>
-                      <View style={[styles.carouselOfferCard, { width: offerCardWidth, marginHorizontal: 10 }]}>
+                      <TouchableOpacity 
+                        activeOpacity={0.85}
+                        onPress={() => router.push({ pathname: '/offer/[id]', params: { id: item.id } })}
+                        style={[styles.carouselOfferCard, { width: offerCardWidth, marginHorizontal: 10 }]}
+                      >
                         <Image 
                           source={{ 
                             uri: item.imageUrl || 'https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg' 
@@ -950,7 +954,7 @@ export default function HomeScreen() {
                             <Text style={styles.heroOfferButtonText}>اطلب الآن</Text>
                           </TouchableOpacity>
                         </View>
-                      </View>
+                      </TouchableOpacity>
                     </View>
                   ))}
                 </ScrollView>

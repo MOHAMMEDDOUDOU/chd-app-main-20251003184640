@@ -350,12 +350,11 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // تاريخ فقط بدون وقت
+    return new Date(dateString).toLocaleDateString('ar-DZ', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   };
 
@@ -545,7 +544,7 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                 <View style={styles.statusSection}>
                     <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
                       <View style={styles.statusWords}>
-                        {String(order.status).split(' ').map((word, idx) => (
+                        {getStatusText(order.status).split(' ').map((word, idx) => (
                           <Text key={idx} style={[styles.statusText, { color: getStatusColor(order.status) }, styles.statusWord]}>{word}</Text>
                         ))}
                       </View>

@@ -624,9 +624,16 @@ export default function OrdersManagement({ onClose }: OrdersManagementProps) {
                         <View style={styles.detailTextContainer}>
                           <Text style={styles.detailLabel}>السعر الأصلي</Text>
                           <Text style={styles.detailValue}>
-                            {selectedOrderForDetails.originalItem?.price 
-                              ? formatPrice(Number(selectedOrderForDetails.originalItem.price)) 
-                              : formatPrice(Number(selectedOrderForDetails.unitPrice || 0))} دج
+                            {(() => {
+                              const orig = selectedOrderForDetails.originalItem?.price != null 
+                                ? Number(selectedOrderForDetails.originalItem.price) 
+                                : Number(selectedOrderForDetails.unitPrice || 0);
+                              const disc = selectedOrderForDetails.originalItem?.discountPrice != null 
+                                ? Number(selectedOrderForDetails.originalItem.discountPrice) 
+                                : null;
+                              const effective = (disc != null && disc > 0 && disc < orig) ? disc : orig;
+                              return `${formatPrice(effective)} دج`;
+                            })()}
                           </Text>
                         </View>
                       </View>
